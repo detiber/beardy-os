@@ -22,9 +22,11 @@ jobs:
       matrix:
         recipe:
           # !! Add your recipes here 
-          - recipe.yml
+          - beardy.yml
+          - beardy-bazzite.yml
+          - beardy-bazzite-deck.yml
     steps:
-       # the build is fully handled by the reusable github action
+      # the build is fully handled by the reusable github action
       - name: Build Custom Image
         uses: blue-build/github-action@v1.7
         with:
