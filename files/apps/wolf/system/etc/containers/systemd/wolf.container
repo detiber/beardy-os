@@ -1,0 +1,58 @@
+# wolf.container
+# modified from: https://github.com/games-on-whales/wolf/pull/92/files
+[Unit]
+Description=Podman Wolf Gamestreaming
+ 
+[Service]
+Environment=PATH=/usr/bin
+TimeoutStartSec=900
+
+# TODO: Look into using systemd-tmpfiles here:
+# https://wiki.archlinux.org/title/Systemd#systemd-tmpfiles_-_temporary_filesd
+# look into config directive/setting for /var/run abstraction
+ExecStartPre=-mkdir -p %T/sockets
+ExecStartPre=-mkdir -p /var/run/wolf
+ExecStartPre=-podman rm --force WolfPulseAudio
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
+
+[Container]
+# Avoid needing to use systemctl daemon-reload for trivial env var changes
+# /etc/sysconfig is the default on Fedora based systems, /etc/default on ubuntu
+# TODO: is there a better way to genericize this, or maybe just dump it into /etc/wolf?
+EnvironmentFile=/etc/sysconfig/wolf 
+
+Image=ghcr.io/games-on-whales/wolf:stable
+AutoUpdate=registry
+
+HostName=%N # TODO: is this the hostname we actually want?
+
+# Figure out what is actually really required here
+#AddCapability=CAP_SYS_PTRACE
+#AddCapability=CAP_NET_ADMIN
+AddCapability=ALL
+
+Network=host
+
+# TODO: figure out tightening back down security
+SecurityLabelDisable=true
+# same as adding '--security-opt seccomp=unconfined' to PodmanArgs
+SeccompProfile=unconfined
+
+PodmanArgs=--ipc=host --device-cgroup-rule "c 13:* rmw"
+
+AddDevice=/dev/dri
+AddDevice=/dev/uinput
+AddDevice=/dev/uhid
+
+Volume=/dev/input:/dev/input:ro
+Volume=/dev/:/dev/:ro
+Volume=/run/udev:/run/udev:ro
+Volume=%T/sockets:/tmp/sockets:rw
+Volume=%t/podman/podman.sock:/var/run/docker.sock:ro
+Volume=/etc/wolf:/etc/wolf:rw
+Volume=/var/run/wolf:/var/run/wolf:rw

@@ -1,0 +1,1 @@
+curl --unix-socket /var/run/wolf/wolf.sock http://localhost/api/v1/sessions | jq
