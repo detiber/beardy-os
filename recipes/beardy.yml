@@ -88,11 +88,6 @@ modules:
         - Hack
         - Symbols
 
-  - type: gschema-overrides
-
-  
-  #gsettings set org.gnome.mutter experimental-features \"['variable-refresh-rate']\""
-
   # Hardware acceleration with Intel (c.f. https://wiki.archlinux.org/title/Hardware_video_acceleration)
   - type: rpm-ostree
     # Need to remove this first otherwise it conflicts with intel-media-driver
