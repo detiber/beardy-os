@@ -68,13 +68,13 @@ modules:
       # remove:
       # - org.gnome.eog
 
-  - type: fonts
-    fonts:
-      nerd-fonts:
-        - FiraCode
-        - Terminus
-        - Hack
-        - Symbols
+  # - type: fonts
+  #   fonts:
+  #     nerd-fonts:
+  #       - FiraCode
+  #       - Terminus
+  #       - Hack
+  #       - Symbols
 
   # - type: akmods
   #   base: main
