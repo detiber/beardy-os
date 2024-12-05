@@ -1,9 +1,9 @@
 modules:
   - type: files
     files:
-      - source: apps/wolf/system
-        destination: / # copies files/apps/wolf/system/* (* means everything inside it) into your image's root folder /
-        
+      - source: system/wolf
+        destination: / # copies files/system/wolf/* (* means everything inside it) into your image's root folder /
+
   - type: justfiles
     validate: true
     include:
