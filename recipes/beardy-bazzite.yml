@@ -18,8 +18,8 @@ modules:
       # - starship
       - qemu
       - virt-manager
-      - edk2-ovmf
-      - samba
+      # - edk2-ovmf
+      # - samba
     remove:
       # example: removing firefox (in favor of the flatpak)
       # "firefox" is the main package, "firefox-langpacks" is a dependency
@@ -56,10 +56,10 @@ modules:
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
 
-  - type: script
-    scripts:
-      # Custom changes for deckstation
-      - sddm/enable-sddm.sh
-      - sddm/disable-sddm-virtualkbd.sh
-      - main/add-justfile.sh
-      - main/deckstation-setup.sh
+  # - type: script
+  #   scripts:
+  #     # Custom changes for deckstation
+  #     - sddm/enable-sddm.sh
+  #     - sddm/disable-sddm-virtualkbd.sh
+  #     - main/add-justfile.sh
+  #     - main/deckstation-setup.sh
