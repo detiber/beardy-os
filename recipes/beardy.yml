@@ -54,15 +54,17 @@ modules:
       repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
       install:
         - com.github.tchx84.Flatseal
-        - io.github.flattool.Warehouse
-        - io.missioncenter.MissionCenter
+        - com.google.Chrome
+        - com.mattjakeman.ExtensionManager
+        - com.valvesoftware.Steam
+        - com.valvesoftware.SteamLink
         - io.github.dvlv.boxbuddyrs
-        - app.devsuite.Pytxis
-        # - com.valvesoftware.Steam
-        # - com.discordapp.Discord
-        # - com.spotify.Client
-        # - org.chromium.Chromium
-        # - org.chromium.Chromium.Codecs
+        - io.github.flattool.Warehouse
+        - io.github.pwr_solaar.solaar
+        - io.missioncenter.MissionCenter
+        - io.podman_desktop.PodmanDesktop
+        - org.cockpit_project.CockpitClient
+        - org.fedoraproject.MediaWriter
       # remove:
       # - org.gnome.eog
 
