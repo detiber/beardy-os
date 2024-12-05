@@ -11,6 +11,69 @@ image-version: latest
 # module configuration, executed in order
 # you can include multiple instances of the same module
 modules:
+  - type: containerfile
+    snippets:
+      - LABEL org.opencontainers.image.source=https://github.com/detiber/beardy-os
+
+  # TODO: switch to sysext for 1password: https://universal-blue.discourse.group/t/installing-1password-in-bluefin-a-better-way/5442/2, https://github.com/travier/fedora-sysexts
+  - bling:
+    install:
+      - rpmfusion
+      - ublue-update
+      - 1password
+      - dconf-update-service
+
+  - type: rpm-ostree
+    # repos:
+    #   # - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
+    install:
+      - qemu
+      - libvirt
+      - virt-manager
+      # - podman-compose
+      # - chromium
+      # - micro
+      # - starship
+    # remove:
+    #   # example: removing firefox (in favor of the flatpak)
+    #   # "firefox" is the main package, "firefox-langpacks" is a dependency
+    #   # - firefox
+    #   # - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+
+  - type: files
+    files:
+      - source: system
+        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+
+  - type: default-flatpaks
+    notify: true # Send notification after install/uninstall is finished (true/false)
+    system:
+      # If no repo information is specified, Flathub will be used by default
+      repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      repo-name: flathub
+      repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
+      install:
+        - com.github.tchx84.Flatseal
+        - io.github.flattool.Warehouse
+        - app/io.missioncenter.MissionCenter
+        - app/io.github.dvlv.boxbuddyrs
+        - app.devsuite.Pytxis
+        # - com.valvesoftware.Steam
+        # - com.discordapp.Discord
+        # - com.spotify.Client
+        # - org.chromium.Chromium
+        # - org.chromium.Chromium.Codecs
+      # remove:
+      # - org.gnome.eog
+
+  - type: fonts
+    fonts:
+      nerd-fonts:
+        - FiraCode
+        - Terminus
+        - Hack
+        - Symbols
+
   # - type: akmods
   #   base: main
   #   install:
@@ -21,13 +84,6 @@ modules:
   #     - ryzen-smu
   #     - zfs
   #     - zenergy
-
-  # - bling:
-  #   install:
-  #     - rpmfusion
-  #     - ublue-update
-  #     - 1password # TODO: switch to sysext for 1password: https://universal-blue.discourse.group/t/installing-1password-in-bluefin-a-better-way/5442/2, https://github.com/travier/fedora-sysexts
-  #     - dconf-update-service
 
   # - type: brew
   #   brew-analytics: false
@@ -49,45 +105,6 @@ modules:
   #   # enable lingering for a user with: `sudo loginctl enable-linger <username>`
   #   # lingering will for a user's unit files to run at boot and continue running even when not logged in
 
-  # - type: containerfile
-  #   snippets:
-  #     - LABEL org.opencontainers.image.source=https://github.com/detiber/beardy-os
-
-  # - type: default-flatpaks
-  #   notify: true # Send notification after install/uninstall is finished (true/false)
-  #   system:
-  #     # If no repo information is specified, Flathub will be used by default
-  #     repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
-  #     repo-name: flathub
-  #     repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
-  #     install:
-  #       - com.valvesoftware.Steam
-  #       - com.github.tchx84.Flatseal
-  #       - com.discordapp.Discord
-  #       - com.spotify.Client
-  #       - org.chromium.Chromium
-  #       - org.chromium.Chromium.Codecs
-  #       - io.github.flattool.Warehouse
-  #       - app/io.missioncenter.MissionCenter
-  #       - app/io.github.dvlv.boxbuddyrs
-  #       - app/io.podman_desktop.PodmanDesktop
-  #       - app.devsuite.Pytxis
-  #     remove:
-  #     # - org.gnome.eog
-
-  # - type: files
-  #   files:
-  #     - source: system
-  #       destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
-
-  # - type: fonts
-  #   fonts:
-  #     nerd-fonts:
-  #       - FiraCode
-  #       - Terminus
-  #       - Hack
-  #       - Symbols
-
   # # # Hardware acceleration with Intel (c.f. https://wiki.archlinux.org/title/Hardware_video_acceleration)
   # # - type: rpm-ostree
   # #   # Need to remove this first otherwise it conflicts with intel-media-driver
@@ -98,22 +115,5 @@ modules:
   # #     - intel-media-driver
   # #     - libva-intel-media-driver
   # #     - igt-gpu-tools # To check GPU usage via sudo intel_gpu_top
-
-  # - type: rpm-ostree
-  #   repos:
-  #     # - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
-  #   install:
-  #     - podman-compose
-  #     - libvirt
-  #     - qemu
-  #     - virt-manager
-  #     # - chromium
-  #     # - micro
-  #     # - starship
-  #   remove:
-  #     # example: removing firefox (in favor of the flatpak)
-  #     # "firefox" is the main package, "firefox-langpacks" is a dependency
-  #     # - firefox
-  #     # - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
