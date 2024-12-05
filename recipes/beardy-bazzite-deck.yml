@@ -15,7 +15,7 @@ modules:
       - LABEL org.opencontainers.image.source=https://github.com/detiber/beardy-os
 
   # TODO: switch to sysext for 1password: https://universal-blue.discourse.group/t/installing-1password-in-bluefin-a-better-way/5442/2, https://github.com/travier/fedora-sysexts
-  - bling:
+  - type: bling
     install:
       - 1password
 
