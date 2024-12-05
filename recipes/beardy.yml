@@ -55,8 +55,8 @@ modules:
       install:
         - com.github.tchx84.Flatseal
         - io.github.flattool.Warehouse
-        - app/io.missioncenter.MissionCenter
-        - app/io.github.dvlv.boxbuddyrs
+        - io.missioncenter.MissionCenter
+        - io.github.dvlv.boxbuddyrs
         - app.devsuite.Pytxis
         # - com.valvesoftware.Steam
         # - com.discordapp.Discord
