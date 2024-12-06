@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 # From: https://github.com/HikariKnight/Deckstation/blob/main/recipes/deckstation-deck.yml
 name: beardy-bazzite-deck
 # description will be included in the image's metadata
