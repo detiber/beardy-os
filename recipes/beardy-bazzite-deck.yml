@@ -21,7 +21,7 @@ modules:
       - 1password
 
   - type: rpm-ostree
-    repos:
+    repos: []
       # - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
     install:
       # - micro
@@ -29,7 +29,7 @@ modules:
       - qemu
       - virt-manager
       # - edk2-ovmf
-    remove:
+    remove: []
       # example: removing firefox (in favor of the flatpak)
       # "firefox" is the main package, "firefox-langpacks" is a dependency
       # - firefox
@@ -55,7 +55,7 @@ modules:
       # Flatpak runtimes are not supported (like org.winehq.Wine//stable-23.08),
       # only normal flatpak applications are (like Floorp Lightning web browser in this example).
       # Installing different branches of the same Flatpak is not supported.
-      remove:
+      remove: []
       # - org.gnome.eog
 
   #- type: systemd
