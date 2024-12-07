@@ -119,4 +119,9 @@ modules:
   # #     - libva-intel-media-driver
   # #     - igt-gpu-tools # To check GPU usage via sudo intel_gpu_top
 
+  - type: systemd
+    system:
+      enabled:
+        - podman.socket
+
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
