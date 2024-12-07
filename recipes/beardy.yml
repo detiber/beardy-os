@@ -124,4 +124,7 @@ modules:
       enabled:
         - podman.socket
 
+  # Add wolf
+  - from-file: apps/wolf.yml
+
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
