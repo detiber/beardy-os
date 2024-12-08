@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - "artifacthub-repo.yml"
+      - ".github/workflows/artifacthub-repo.yml"
   workflow_dispatch: # allow manually triggering builds
 concurrency:
   # only run one build at a time
