@@ -131,4 +131,8 @@ modules:
         - sshd.service
         - ublue-update.service
 
+  - type: script
+    scripts:
+      - unwrap-cli.sh
+
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
