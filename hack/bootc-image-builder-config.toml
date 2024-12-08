@@ -1,0 +1,11 @@
+# TODO: sort out a proper config
+[customizations.installer.kickstart]
+contents = """
+zerombr
+"""
+
+[customizations.installer.modules]
+enable = [
+  "org.fedoraproject.Anaconda.Modules.Localization",
+  "org.fedoraproject.Anaconda.Modules.Users"
+]

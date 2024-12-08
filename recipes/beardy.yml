@@ -35,6 +35,7 @@ modules:
       - qemu
       - libvirt
       - virt-manager
+      - osbuild-selinux
       # - podman-compose
       # - chromium
       # - micro
