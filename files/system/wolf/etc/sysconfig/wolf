@@ -1,0 +1,11 @@
+# Environment variables for Podman Wolf Gamestreaming
+
+# Temporary debugging vars
+#WOLF_LOG_LEVEL=DEBUG
+#WOLF_STOP_CONTAINER_ON_EXIT=true
+#WOLF_RENDER_NODE=SOFTWARE
+
+# TODO: figure out how to propagate TZ to created containers
+TZ=America/New_York
+
+WOLF_SOCKET_PATH=/var/run/wolf/wolf.sock
