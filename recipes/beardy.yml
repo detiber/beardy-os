@@ -20,7 +20,7 @@ modules:
   - type: bling
     install:
       - rpmfusion
-      - ublue-update
+      # - ublue-update
       - 1password
       - dconf-update-service
 
