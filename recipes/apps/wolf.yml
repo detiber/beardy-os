@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: files
+    files:
+      - source: system/wolf
+        destination: / # copies files/system/wolf/* (* means everything inside it) into your image's root folder /
+
+  - type: justfiles
+    validate: true
+    include:
+      - apps/wolf
