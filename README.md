@@ -1,4 +1,4 @@
-# beardy-os &nbsp; [![bluebuild build badge](https://github.com/detiber/beardy-os/actions/workflows/build.yml/badge.svg)](https://github.com/detiber/beardy-os/actions/workflows/build.yml)
+# beardy-os &nbsp; [![bluebuild build badge](https://github.com/detiber/beardy-os/actions/workflows/build.yml/badge.svg)](https://github.com/detiber/beardy-os/actions/workflows/build.yml) [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/beardy-os)](https://artifacthub.io/packages/search?repo=beardy-os)
 
 See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
 
