@@ -27,8 +27,8 @@ jobs:
         recipe:
           # !! Add your recipes here 
           - beardy.yml
-          - beardy-bazzite.yml
-          - beardy-bazzite-deck.yml
+          # - beardy-bazzite.yml
+          # - beardy-bazzite-deck.yml
     steps:
       # the build is fully handled by the reusable github action
       - name: Build Custom Image
