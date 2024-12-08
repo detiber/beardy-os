@@ -14,7 +14,11 @@ image-version: latest
 modules:
   - type: containerfile
     snippets:
+      - LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/detiber/beardy-os/main/README.md
       - LABEL org.opencontainers.image.source=https://github.com/detiber/beardy-os
+      - LABEL org.opencontainers.image.url=https://github.com/detiber/beardy-os
+      - LABEL org.opencontainers.image.vendor=detiber
+
 
   # TODO: switch to sysext for 1password: https://universal-blue.discourse.group/t/installing-1password-in-bluefin-a-better-way/5442/2, https://github.com/travier/fedora-sysexts
   - type: bling
