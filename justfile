@@ -32,7 +32,9 @@ generate-ignition:
 output-dir:
   mkdir -p output
 
-bluebuild-generate-iso: output-dir
+# TODO: failing with error:
+#    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
+bluebuild-generate-server-iso: output-dir
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
@@ -44,6 +46,10 @@ bluebuild-generate-iso: output-dir
     --variant server \
     --iso-name output/beardy-server.iso \
     image {{beardy-image}}
+
+# TODO: failing with error:
+#    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
+bluebuild-generate-kinoite-iso: output-dir
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
@@ -55,6 +61,9 @@ bluebuild-generate-iso: output-dir
     --variant kinoite \
     --iso-name output/beardy-kinoite.iso \
     image {{beardy-image}}
+
+# TODO: untested
+bluebuild-generate-silverblue-iso: output-dir
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
@@ -71,6 +80,7 @@ bluebuild-generate-iso: output-dir
 bib-version := "latest"
 bib-image := "quay.io/centos-bootc/bootc-image-builder:" + bib-version
 
+# TODO: failing with error at beginning of installation summary, seems to be missing some dependencies
 # Generate iso image
 generate-iso: output-dir
   sudo podman run -it --rm \
@@ -84,6 +94,7 @@ generate-iso: output-dir
     --type iso \
     {{beardy-image}}
 
+# TODO: needs to be tested, requires injecting user config
 generate-images: output-dir
   sudo podman run -it --rm \
     --privileged \
