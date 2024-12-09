@@ -2,47 +2,98 @@
 default:
   @just --list
 
+beardy-version := "latest"
+beardy-image := "ghcr.io/detiber/beardy-os:" + beardy-version
+
+bluebuild-version := "latest"
+bluebuild-image := "ghcr.io/blue-build/cli:" + bluebuild-version
+
 # Validate all recipes
 validate-recipes:
   for file in `ls recipes/*.yml`; do \
-    podman run -it -v '{{absolute_path(".")}}':/bluebuild --rm ghcr.io/blue-build/cli:latest bluebuild validate ${file}; \
+    podman run -it --rm \
+      --pull=newer \
+      --security-opt label=type:unconfined_t \
+      -v '{{absolute_path(".")}}':/bluebuild \
+      {{bluebuild-image}} \
+      bluebuild validate ${file}; \
   done
 
+butane-version := "release"
+butane-image := "quay.io/coreos/butane:" + butane-version
+
+# Generate ignition config
 generate-ignition:
-  podman pull quay.io/coreos/butane:release
-  podman run -i --rm quay.io/coreos/butane:release --pretty --strict < hack/beardy-autorebase.butane > hack/beardy-autorebase.ign
+  podman run -i --rm \
+    --pull=newer \
+    {{butane-image}} \
+    --pretty --strict < hack/beardy-autorebase.butane > hack/beardy-autorebase.ign
 
-bluebuild:
-  sudo bluebuild generate-iso --iso-name output/beardy-os.iso image ghcr.io/detiber/beardy-os:latest
-
-generate-images:
+output-dir:
   mkdir -p output
-  sudo podman run \
-    --rm \
-    -it \
+
+bluebuild-generate-iso: output-dir
+  sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{absolute_path(".")}}':/bluebuild \
+    {{bluebuild-image}} \
+    bluebuild generate-iso \
+    -R podman \
+    --variant server \
+    --iso-name output/beardy-server.iso \
+    image {{beardy-image}}
+  sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{absolute_path(".")}}':/bluebuild \
+    {{bluebuild-image}} \
+    bluebuild generate-iso \
+    -R podman \
+    --variant kinoite \
+    --iso-name output/beardy-kinoite.iso \
+    image {{beardy-image}}
+  sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{absolute_path(".")}}':/bluebuild \
+    {{bluebuild-image}} \
+    bluebuild generate-iso \
+    -R podman \
+    --variant silverblue \
+    --iso-name output/beardy-silverblue.iso \
+    image {{beardy-image}}
+
+
+bib-version := "latest"
+bib-image := "quay.io/centos-bootc/bootc-image-builder:" + bib-version
+
+# Generate iso image
+generate-iso: output-dir
+  sudo podman run -it --rm \
     --privileged \
     --pull=newer \
     --security-opt label=type:unconfined_t \
     -v ./output:/output \
     -v ./hack/bootc-image-builder-config.toml:/config.toml:ro \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
-    quay.io/centos-bootc/bootc-image-builder:latest \
+    {{bib-image}} \
     --type iso \
-    ghcr.io/detiber/beardy-os:latest
+    {{beardy-image}}
 
-# sudo podman run \
-#   --rm \
-#   -it \
-#   --privileged \
-#   --pull=newer \
-#   --security-opt label=type:unconfined_t \
-#   -v ./output:/output \
-#   -v ./hack/bootc-image-builder-config.toml:/config.toml:ro \
-#   -v /var/lib/containers/storage:/var/lib/containers/storage \
-#   quay.io/centos-bootc/bootc-image-builder:latest \
-#   --type qcow2 \
-#   --rootfs btrfs \
-#   ghcr.io/detiber/beardy-os:latest
-# sudo podman run --rm --privileged --volume ./iso-output:/build-container-installer/build --security-opt label=disable --pull=newer ghcr.io/lauretano/t2-atomic-bluefin:latest
-# sudo docker run --rm --privileged --volume ./iso-output:/build-container-installer/build --pull=always ghcr.io/lauretano/t2-atomic-bluefin:latest
-# or maybe https://wiki.archlinux.org/title/Mkosi
+generate-images: output-dir
+  sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v ./output:/output \
+    -v ./hack/bootc-image-builder-config.toml:/config.toml:ro \
+    -v /var/lib/containers/storage:/var/lib/containers/storage \
+    {{bib-image}} \
+    --type qcow2 \
+    --type raw \
+    --rootfs btrfs \
+    {{beardy-image}}
