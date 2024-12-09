@@ -29,12 +29,25 @@ generate-ignition:
     {{butane-image}} \
     --pretty --strict < hack/beardy-autorebase.butane > hack/beardy-autorebase.ign
 
-output-dir:
-  mkdir -p output
+bib-build-dirs: bib-output-dir bib-store-dir bib-rpmmd-dir
+
+bib-output-dir:
+  mkdir -p build/bib/output
+
+bib-store-dir:
+  mkdir -p build/bib/cache/store
+
+bib-rpmmd-dir:
+  mkdir -p build/bib/cache/rpmmd
+
+bluebuild-build-dirs: bluebuild-output-dir
+
+bluebuild-output-dir:
+  mkdir -p build/bluebuild/output
 
 # TODO: failing with error:
 #    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
-bluebuild-generate-server-iso: output-dir
+bluebuild-generate-server-iso: bluebuild-build-dirs
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
@@ -44,12 +57,12 @@ bluebuild-generate-server-iso: output-dir
     bluebuild generate-iso \
     -R podman \
     --variant server \
-    --iso-name output/beardy-server.iso \
+    --iso-name build/bluebuild/output/beardy-server.iso \
     image {{beardy-image}}
 
 # TODO: failing with error:
 #    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
-bluebuild-generate-kinoite-iso: output-dir
+bluebuild-generate-kinoite-iso: bluebuild-build-dirs
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
@@ -59,11 +72,19 @@ bluebuild-generate-kinoite-iso: output-dir
     bluebuild generate-iso \
     -R podman \
     --variant kinoite \
-    --iso-name output/beardy-kinoite.iso \
+    --iso-name build/bluebuild/output/beardy-kinoite.iso \
     image {{beardy-image}}
+# sudo podman run --rm --privileged \
+#   --volume ./iso:/build-container-installer/build \
+#   ghcr.io/jasonn3/build-container-installer:latest \
+#   VERSION=41 \
+#   IMAGE_NAME=beardy-os \
+#   IMAGE_TAG=latest \
+#   VARIANT=Kinoite \
+#   IMAGE_REPO=ghcr.io/detiber
 
 # TODO: untested
-bluebuild-generate-silverblue-iso: output-dir
+bluebuild-generate-silverblue-iso: bluebuild-build-dirs
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
@@ -73,7 +94,7 @@ bluebuild-generate-silverblue-iso: output-dir
     bluebuild generate-iso \
     -R podman \
     --variant silverblue \
-    --iso-name output/beardy-silverblue.iso \
+    --iso-name build/bluebuild/output/beardy-silverblue.iso \
     image {{beardy-image}}
 
 
@@ -82,29 +103,47 @@ bib-image := "quay.io/centos-bootc/bootc-image-builder:" + bib-version
 
 # TODO: failing with error at beginning of installation summary, seems to be missing some dependencies
 # Generate iso image
-generate-iso: output-dir
+generate-iso: bib-build-dirs
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
     --security-opt label=type:unconfined_t \
-    -v ./output:/output \
-    -v ./hack/bootc-image-builder-config.toml:/config.toml:ro \
+    -v ./hack/bib-iso-config.toml:/config.toml:ro \
+    -v ./build/bib/output:/output \
+    -v ./build/bib/cache/store:/store \
+    -v ./build/bib/cache/rpmmd:/rpmmd \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     {{bib-image}} \
     --type iso \
+    --log-level info \
     {{beardy-image}}
 
 # TODO: needs to be tested, requires injecting user config
-generate-images: output-dir
+# for testing: virt-install --import --disk ./output/qcow2/qcow2/disk.qcow2,format=qcow2 --cpu host-passthrough --memory 8192 --vcpus 4 --os-variant silverblue-unknown
+generate-images: bib-build-dirs
   sudo podman run -it --rm \
     --privileged \
     --pull=newer \
     --security-opt label=type:unconfined_t \
-    -v ./output:/output \
-    -v ./hack/bootc-image-builder-config.toml:/config.toml:ro \
+    -v ./hack/bib-img-config.toml:/config.toml:ro \
+    -v ./build/bib/output:/output \
+    -v ./build/bib/cache/store:/store \
+    -v ./build/bib/cache/rpmmd:/rpmmd \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     {{bib-image}} \
     --type qcow2 \
     --type raw \
     --rootfs btrfs \
+    --log-level info \
     {{beardy-image}}
+
+clean-all: clean-bib-cache clean-bib-output clean-bluebuild-output
+
+clean-bib-cache:
+  rm -rf build/bib/cache
+
+clean-bib-output:
+  rm -rf build/bib/output
+
+clean-bluebuild-output:
+  rm -rf build/bluebuild/output

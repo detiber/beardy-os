@@ -1,0 +1,18 @@
+# TODO: sort out a proper config
+[customizations.installer.kickstart]
+contents = """
+graphical --noninteractive
+zerombr
+clearpart --all --initlabel --disklabel=gpt
+autopart --noswap --type btrfs
+network --bootproto=dhcp --device=link --activate --onboot=on
+timezone --utc America/New_York
+firstboot --enable
+reboot
+"""
+
+# [customizations.installer.modules]
+# enable = [
+#   "org.fedoraproject.Anaconda.Modules.Localization",
+#   "org.fedoraproject.Anaconda.Modules.Users"
+# ]

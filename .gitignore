@@ -1,4 +1,6 @@
 cosign.key
 cosign.private
 /Containerfile
-output
+
+# build output and cache directories
+build/
