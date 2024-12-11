@@ -2,7 +2,7 @@
 
 set STREAM stable
 set VERSION 41.20241109.3.0
-set CONFIGURL https://github.com/detiber/beardy-os/blob/main/hack/base.ign
+set CONFIGURL https://raw.githubusercontent.com/detiber/beardy-os/refs/heads/main/hack/base.ign
 
 set BASEURL https://builds.coreos.fedoraproject.org/prod/streams/${STREAM}/builds/${VERSION}/x86_64
 
