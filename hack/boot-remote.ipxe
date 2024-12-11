@@ -1,4 +1,5 @@
 #!ipxe
+dhcp net0
 
 set STREAM stable
 set VERSION 41.20241109.3.0
