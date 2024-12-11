@@ -3,196 +3,166 @@ default:
   @just --list
 
 beardy-version := "latest"
-beardy-image := "ghcr.io/detiber/beardy-os:" + beardy-version
+beardy-repo := "ghcr.io/detiber"
+#beardy-image := beardy-repo + "/beardy-os:" + beardy-version
 
 bluebuild-version := "latest"
 bluebuild-image := "ghcr.io/blue-build/cli:" + bluebuild-version
 
-# Validate all recipes
-validate-recipes:
-  for file in `ls recipes/*.yml`; do \
-    podman run -it --rm \
-      --pull=newer \
-      --security-opt label=type:unconfined_t \
-      -v '{{absolute_path(".")}}':/bluebuild \
-      {{bluebuild-image}} \
-      bluebuild validate ${file}; \
-  done
-
 butane-version := "release"
 butane-image := "quay.io/coreos/butane:" + butane-version
-
-# Generate ignition config
-generate-ignition:
-  podman run -i --rm \
-    --pull=newer \
-    {{butane-image}} \
-    --pretty --strict < hack/beardy-autorebase.butane > hack/beardy-autorebase.ign
-
-bib-build-dirs: bib-output-dir bib-store-dir bib-rpmmd-dir
-
-bib-output-dir:
-  mkdir -p build/bib/output/base
-  mkdir -p build/bib/output/beardy
-
-bib-store-dir:
-  mkdir -p build/bib/cache/store
-
-bib-rpmmd-dir:
-  mkdir -p build/bib/cache/rpmmd
-
-bluebuild-build-dirs: bluebuild-output-dir
-
-bluebuild-output-dir:
-  mkdir -p build/bluebuild/output
-
-bluebuild-generate-containerfile: bluebuild-build-dirs
-  podman run -it --rm \
-  --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v '{{absolute_path(".")}}':/bluebuild \
-    {{bluebuild-image}} \
-    bluebuild generate -o build/Containerfile recipes/beardy.yml
-
-# TODO: failing with error:
-#    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
-bluebuild-generate-server-iso: bluebuild-build-dirs
-  sudo podman run -it --rm \
-    --privileged \
-    --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v '{{absolute_path(".")}}':/bluebuild \
-    {{bluebuild-image}} \
-    bluebuild generate-iso \
-    -R podman \
-    --variant server \
-    --iso-name build/bluebuild/output/beardy-server.iso \
-    image {{beardy-image}}
-
-# TODO: failing with error:
-#    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
-bluebuild-generate-kinoite-iso: bluebuild-build-dirs
-  sudo podman run -it --rm \
-    --privileged \
-    --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v '{{absolute_path(".")}}':/bluebuild \
-    {{bluebuild-image}} \
-    bluebuild generate-iso \
-    -R podman \
-    --variant kinoite \
-    --iso-name build/bluebuild/output/beardy-kinoite.iso \
-    image {{beardy-image}}
-# sudo podman run --rm --privileged \
-#   --volume ./iso:/build-container-installer/build \
-#   ghcr.io/jasonn3/build-container-installer:latest \
-#   VERSION=41 \
-#   IMAGE_NAME=beardy-os \
-#   IMAGE_TAG=latest \
-#   VARIANT=Kinoite \
-#   IMAGE_REPO=ghcr.io/detiber
-
-# TODO: untested
-bluebuild-generate-silverblue-iso: bluebuild-build-dirs
-  sudo podman run -it --rm \
-    --privileged \
-    --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v '{{absolute_path(".")}}':/bluebuild \
-    {{bluebuild-image}} \
-    bluebuild generate-iso \
-    -R podman \
-    --variant silverblue \
-    --iso-name build/bluebuild/output/beardy-silverblue.iso \
-    image {{beardy-image}}
-
 
 bib-version := "latest"
 bib-image := "quay.io/centos-bootc/bootc-image-builder:" + bib-version
 
-bib-base: bib-build-dirs
-  echo {{beardy-image}}
-  sudo podman run -it --rm \
-    --privileged \
-    --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v ./hack/bib-img-config.toml:/config.toml:ro \
-    -v ./build/bib/output/base:/output \
-    -v ./build/bib/cache/store:/store \
-    -v ./build/bib/cache/rpmmd:/rpmmd \
-    -v /var/lib/containers/storage:/var/lib/containers/storage \
-    {{bib-image}} \
-    --local \
-    --type qcow2 \
-    --type raw \
-    --rootfs btrfs \
-    --log-level info \
-    {{beardy-image}}
+[group('lint')]
+[group('validate')]
+validate-all: validate-recipes
 
-bib-base-iso: bib-build-dirs
-  echo {{beardy-image}}
-  sudo podman run -it --rm \
-    --privileged \
-    --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v ./hack/bib-iso-config.toml:/config.toml:ro \
-    -v ./build/bib/output/base:/output \
-    -v ./build/bib/cache/store:/store \
-    -v ./build/bib/cache/rpmmd:/rpmmd \
-    -v /var/lib/containers/storage:/var/lib/containers/storage \
-    {{bib-image}} \
-    --local \
-    --type iso \
-    --log-level info \
-    {{beardy-image}}
+# Validate all recipes
+[group('lint')]
+[group('validate')]
+validate-recipes:
+  for file in `ls recipes/*.yml`; do \
+    just validate-recipe-for ${file}; \
+  done
 
-# TODO: failing with error at beginning of installation summary, seems to be missing some dependencies
-# Generate iso image
-generate-iso: bib-build-dirs
-  sudo podman run -it --rm \
-    --privileged \
+_validate-recipe-for recipe_def:
+  podman run -it --rm \
     --pull=newer \
     --security-opt label=type:unconfined_t \
-    -v ./hack/bib-iso-config.toml:/config.toml:ro \
-    -v ./build/bib/output/beardy:/output \
-    -v ./build/bib/cache/store:/store \
-    -v ./build/bib/cache/rpmmd:/rpmmd \
-    -v /var/lib/containers/storage:/var/lib/containers/storage \
-    {{bib-image}} \
-    --type iso \
-    --log-level info \
-    {{beardy-image}}
+    -v '{{absolute_path(".")}}':/bluebuild \
+    {{bluebuild-image}} \
+    bluebuild validate {{recipe_def}}
 
-# TODO: needs to be tested, requires injecting user config
-# for testing: virt-install --import --disk ./output/qcow2/qcow2/disk.qcow2,format=qcow2 --cpu host-passthrough --memory 8192 --vcpus 4 --os-variant silverblue-unknown
-generate-images: bib-build-dirs
-  sudo podman run -it --rm \
+[group('generate')]
+generate-all: generate-ignition
+
+# Generate ignition config
+[group('generate')]
+[group('ignition')]
+generate-ignition:
+  for file in `ls hack/*.butane`; do \
+    just generate-ignition-for ${file}; \
+  done
+
+_generate-ignition-for butane_config:
+  @echo {{without_extension(butane_config)}}
+  podman run -i --rm \
+    --pull=newer \
+    {{butane-image}} \
+    --pretty --strict < {{butane_config}} > {{without_extension(butane_config)}}.ign
+
+common-build-dir := absolute_path("./build")
+_ensure-directory dir_path:
+  mkdir -p {{dir_path}}
+
+common-bib-output-dir := join(common-build-dir, "bib", "output")
+common-bib-cache-dir := join(common-build-dir, "bib", "cache")
+common-bib-store-cache-dir := join(common-bib-cache-dir, "store")
+common-bib-rpmmd-cache-dir := join(common-bib-cache-dir, "rpmmd")
+_bib image output_dir config args: (_ensure-directory common-bib-store-cache-dir) (_ensure-directory common-bib-rpmmd-cache-dir)
+  podman run --it --rm \
     --privileged \
     --pull=newer \
     --security-opt label=type:unconfined_t \
-    -v ./hack/bib-img-config.toml:/config.toml:ro \
-    -v ./build/bib/output/beardy:/output \
-    -v ./build/bib/cache/store:/store \
-    -v ./build/bib/cache/rpmmd:/rpmmd \
+    -v '{{config}}':/config.toml:ro \
+    -v '{{output_dir}}':/output \
+    -v '{{common-bib-store-cache-dir}}':/store \
+    -v '{{common-bib-rpmmd-cache-dir}}':/rpmmd \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
     {{bib-image}} \
-    --type qcow2 \
-    --type raw \
-    --rootfs btrfs \
+    {{args}} \
     --log-level info \
-    {{beardy-image}}
+    {{image}}
+
+common-bib-image-config := absolute_path("./hack/bib-img-config.toml")
+common-bib-image-args := "--type qcow2 --rootfs btrfs"
+_bib-image image output_dir: && (_bib image output_dir common-bib-image-config common-bib-image-args)
+
+common-bib-iso-config := absolute_path("./hack/bib-iso-config.toml")
+common-bib-iso-args := "--type iso"
+_bib-iso image output_dir: && (_bib image output_dir common-bib-iso-config common-bib-iso-args)
+
+bib-base-image-name := "beardy-os-base"
+bib-base-image := beardy-repo + "/" + bib-base-image-name + ":" + beardy-version
+bib-base-image-output-dir := join(common-bib-output-dir, "base")
+[group('disk images')]
+[group('bib')]
+bib-image-base: (_ensure-directory bib-base-image-output-dir) && (_bib-image bib-base-image bib-base-image-output-dir)
+
+[group('iso')]
+[group('bib')]
+bib-iso-base: (_ensure-directory bib-base-image-output-dir) && (_bib-iso bib-base-image bib-base-image-output-dir)
+
+bib-beardy-image-name := "beardy-os"
+bib-beardy-image := beardy-repo + "/" + bib-beardy-image-name + ":" + beardy-version
+bib-beardy-image-output-dir := join(common-bib-output-dir, "beardy")
+[group('disk images')]
+[group('bib')]
+bib-image-beardy: (_ensure-directory bib-beardy-image-output-dir) && (_bib-image bib-beardy-image bib-beardy-image-output-dir)
+
+[group('iso')]
+[group('bib')]
+bib-iso-beardy: (_ensure-directory bib-beardy-image-output-dir) && (_bib-iso bib-beardy-image bib-beardy-image-output-dir)
+
+common-bluebuild-output-dir := join(common-build-dir, "bluebuild", "output")
+_bluebuild-containerfile recipe output_dir:
+  podman run -it --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{absolute_path(".")}}':/bluebuild \
+    -v '{{output_dir}}':/output \
+    {{bluebuild-image}} \
+    bluebuild generate -o /output/Containerfile {{recipe}}
+
+_bluebuild-iso recipe output_dir image_name image variant:
+  echo sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{absolute_path(".")}}':/bluebuild \
+    -v '{{output_dir}}':/output \
+    bluebuild generate-iso \
+    -R podman \
+    --variant {{variant}} \
+    --iso-name "/output/{{image_name}}-{{variant}}.iso" \
+    image {{image}}
+
+bluebuild-beardy-output-dir := join(common-bluebuild-output-dir, "beardy")
+bluebuild-beardy-recipe-file := "recipes/beardy.yml"
+bluebuild-beardy-image-name := "beardy-os"
+bluebuild-beardy-image := beardy-repo + "/" + bluebuild-beardy-image-name + ":" + beardy-version
+[group('containerfile')]
+[group('bluebuild')]
+bluebuild-containerfile-beardy: (_ensure-directory bluebuild-beardy-output-dir) && (_bluebuild-containerfile bluebuild-beardy-recipe-file bluebuild-beardy-output-dir)
+
+[group('iso')]
+[group('bluebuild')]
+bluebuild-iso-beardy-server: (_ensure-directory bluebuild-beardy-output-dir) && (_bluebuild-iso bluebuild-beardy-recipe-file bluebuild-beardy-output-dir bluebuild-beardy-image-name bluebuild-beardy-image "server")
+
+[group('iso')]
+[group('bluebuild')]
+bluebuild-iso-beardy-kinoite: (_ensure-directory bluebuild-beardy-output-dir) && (_bluebuild-iso bluebuild-beardy-recipe-file bluebuild-beardy-output-dir bluebuild-beardy-image-name bluebuild-beardy-image "kinoite")
+
+[group('iso')]
+[group('bluebuild')]
+bluebuild-iso-beardy-silverblue: (_ensure-directory bluebuild-beardy-output-dir) && (_bluebuild-iso bluebuild-beardy-recipe-file bluebuild-beardy-output-dir bluebuild-beardy-image-name bluebuild-beardy-image "silverblue")
 
 [group('clean')]
 clean-all: clean-bib-cache clean-bib-output clean-bluebuild-output
 
 [group('clean')]
+[group('bib')]
 clean-bib-cache:
-  rm -rf build/bib/cache
+  rm -rf {{common-bib-cache-dir}}
 
 [group('clean')]
+[group('bib')]
 clean-bib-output:
-  rm -rf build/bib/output
+  rm -rf {{common-bib-output-dir}}
 
 [group('clean')]
+[group('bluebuild')]
 clean-bluebuild-output:
   rm -rf build/bluebuild/output

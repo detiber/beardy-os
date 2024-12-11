@@ -1,0 +1,41 @@
+{
+  "ignition": {
+    "version": "3.3.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "groups": [
+          "wheel",
+          "sudo"
+        ],
+        "name": "core",
+        "sshAuthorizedKeys": [
+          "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIDFeiGuhMVEvVcRI8/yb1U6SkdNnv4OaBlfbcEWkKhafAAAABHNzaDo="
+        ]
+      }
+    ]
+  },
+  "storage": {
+    "directories": [
+      {
+        "path": "/etc/ucore-autobootcswitch",
+        "mode": 492
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "contents": "[Unit]\nDescription=uCore autobootcswitch to unsigned OCI and reboot\nConditionPathExists=!/etc/ucore-autobootcswitch/unverified\nConditionPathExists=!/etc/ucore-autobootcswitch/signed\nAfter=network-online.target\nWants=network-online.target\n[Service]\nType=oneshot\nStandardOutput=journal+console\nExecStart=/usr/bin/bootc switch ghcr.io/detiber/beardy-os:latest\nExecStart=/usr/bin/touch /etc/ucore-autobootcswitch/unverified\nExecStart=/usr/bin/systemctl disable ucore-unsigned-autobootcswitch.service\nExecStart=/usr/bin/systemctl reboot\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "ucore-unsigned-autobootcswitch.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=uCore autobootcswitch to signed OCI and reboot\nConditionPathExists=/etc/ucore-autobootcswitch/unverified\nConditionPathExists=!/etc/ucore-autobootcswitch/verified\nAfter=network-online.target\nWants=network-online.target\n[Service]\nType=oneshot\nStandardOutput=journal+console\nExecStart=/usr/bin/bootc switch --enforce-container-sigpolicy ghcr.io/detiber/beardy-os:latest\nExecStart=/usr/bin/touch /etc/ucore-autobootcswitch/signed\nExecStart=/usr/bin/systemctl disable ucore-signed-autobootcswitch.service\nExecStart=/usr/bin/systemctl reboot\n[Install]\nWantedBy=multi-user.target",
+        "enabled": true,
+        "name": "ucore-signed-autobootcswitch.service"
+      }
+    ]
+  }
+}

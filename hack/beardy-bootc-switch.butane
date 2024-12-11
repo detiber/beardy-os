@@ -1,0 +1,53 @@
+variant: fcos
+version: 1.6.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIDFeiGuhMVEvVcRI8/yb1U6SkdNnv4OaBlfbcEWkKhafAAAABHNzaDo=
+      groups:
+        - wheel
+        - sudo        
+storage:
+  directories:
+    - path: /etc/ucore-autobootcswitch
+      mode: 0754
+systemd:
+  units:
+    # TODO: can we avoid the intermediate step with bootc switch???
+    - name: ucore-unsigned-autobootcswitch.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=uCore autobootcswitch to unsigned OCI and reboot
+        ConditionPathExists=!/etc/ucore-autobootcswitch/unverified
+        ConditionPathExists=!/etc/ucore-autobootcswitch/signed
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        StandardOutput=journal+console
+        ExecStart=/usr/bin/bootc switch ghcr.io/detiber/beardy-os:latest
+        ExecStart=/usr/bin/touch /etc/ucore-autobootcswitch/unverified
+        ExecStart=/usr/bin/systemctl disable ucore-unsigned-autobootcswitch.service
+        ExecStart=/usr/bin/systemctl reboot
+        [Install]
+        WantedBy=multi-user.target
+    - name: ucore-signed-autobootcswitch.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=uCore autobootcswitch to signed OCI and reboot
+        ConditionPathExists=/etc/ucore-autobootcswitch/unverified
+        ConditionPathExists=!/etc/ucore-autobootcswitch/verified
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        StandardOutput=journal+console
+        ExecStart=/usr/bin/bootc switch --enforce-container-sigpolicy ghcr.io/detiber/beardy-os:latest
+        ExecStart=/usr/bin/touch /etc/ucore-autobootcswitch/signed
+        ExecStart=/usr/bin/systemctl disable ucore-signed-autobootcswitch.service
+        ExecStart=/usr/bin/systemctl reboot
+        [Install]
+        WantedBy=multi-user.target
