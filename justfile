@@ -32,7 +32,8 @@ generate-ignition:
 bib-build-dirs: bib-output-dir bib-store-dir bib-rpmmd-dir
 
 bib-output-dir:
-  mkdir -p build/bib/output
+  mkdir -p build/bib/output/base
+  mkdir -p build/bib/output/beardy
 
 bib-store-dir:
   mkdir -p build/bib/cache/store
@@ -44,6 +45,14 @@ bluebuild-build-dirs: bluebuild-output-dir
 
 bluebuild-output-dir:
   mkdir -p build/bluebuild/output
+
+bluebuild-generate-containerfile: bluebuild-build-dirs
+  podman run -it --rm \
+  --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{absolute_path(".")}}':/bluebuild \
+    {{bluebuild-image}} \
+    bluebuild generate -o build/Containerfile recipes/beardy.yml
 
 # TODO: failing with error:
 #    The command 'ostree container image deploy --sysroot=/mnt/sysimage --image=/run/install/repo/beardy-os-latest --transport=oci --no-signature-verification' exited with the code 1.
@@ -101,6 +110,42 @@ bluebuild-generate-silverblue-iso: bluebuild-build-dirs
 bib-version := "latest"
 bib-image := "quay.io/centos-bootc/bootc-image-builder:" + bib-version
 
+bib-base: bib-build-dirs
+  echo {{beardy-image}}
+  sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v ./hack/bib-img-config.toml:/config.toml:ro \
+    -v ./build/bib/output/base:/output \
+    -v ./build/bib/cache/store:/store \
+    -v ./build/bib/cache/rpmmd:/rpmmd \
+    -v /var/lib/containers/storage:/var/lib/containers/storage \
+    {{bib-image}} \
+    --local \
+    --type qcow2 \
+    --type raw \
+    --rootfs btrfs \
+    --log-level info \
+    {{beardy-image}}
+
+bib-base-iso: bib-build-dirs
+  echo {{beardy-image}}
+  sudo podman run -it --rm \
+    --privileged \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v ./hack/bib-iso-config.toml:/config.toml:ro \
+    -v ./build/bib/output/base:/output \
+    -v ./build/bib/cache/store:/store \
+    -v ./build/bib/cache/rpmmd:/rpmmd \
+    -v /var/lib/containers/storage:/var/lib/containers/storage \
+    {{bib-image}} \
+    --local \
+    --type iso \
+    --log-level info \
+    {{beardy-image}}
+
 # TODO: failing with error at beginning of installation summary, seems to be missing some dependencies
 # Generate iso image
 generate-iso: bib-build-dirs
@@ -109,7 +154,7 @@ generate-iso: bib-build-dirs
     --pull=newer \
     --security-opt label=type:unconfined_t \
     -v ./hack/bib-iso-config.toml:/config.toml:ro \
-    -v ./build/bib/output:/output \
+    -v ./build/bib/output/beardy:/output \
     -v ./build/bib/cache/store:/store \
     -v ./build/bib/cache/rpmmd:/rpmmd \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
@@ -126,7 +171,7 @@ generate-images: bib-build-dirs
     --pull=newer \
     --security-opt label=type:unconfined_t \
     -v ./hack/bib-img-config.toml:/config.toml:ro \
-    -v ./build/bib/output:/output \
+    -v ./build/bib/output/beardy:/output \
     -v ./build/bib/cache/store:/store \
     -v ./build/bib/cache/rpmmd:/rpmmd \
     -v /var/lib/containers/storage:/var/lib/containers/storage \
@@ -137,13 +182,17 @@ generate-images: bib-build-dirs
     --log-level info \
     {{beardy-image}}
 
+[group('clean')]
 clean-all: clean-bib-cache clean-bib-output clean-bluebuild-output
 
+[group('clean')]
 clean-bib-cache:
   rm -rf build/bib/cache
 
+[group('clean')]
 clean-bib-output:
   rm -rf build/bib/output
 
+[group('clean')]
 clean-bluebuild-output:
   rm -rf build/bluebuild/output

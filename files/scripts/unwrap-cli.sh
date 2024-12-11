@@ -13,3 +13,8 @@ if [ -d /usr/libexec/rpm-ostree/wrapped ]; then
     mv -f /usr/libexec/rpm-ostree/wrapped/* /usr/bin
     rm -fr /usr/libexec/rpm-ostree
 fi
+
+RELEASE="$(rpm -E %fedora)"
+if [ 40 -eq ${RELEASE} ]; then
+    rpm-ostree install --idempotent dnf5 dnf5-plugins
+fi

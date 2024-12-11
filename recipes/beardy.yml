@@ -18,25 +18,54 @@ modules:
       - LABEL org.opencontainers.image.source=https://github.com/detiber/beardy-os
       - LABEL org.opencontainers.image.url=https://github.com/detiber/beardy-os
       - LABEL org.opencontainers.image.vendor=detiber
+      - LABEL org.opencontainers.image.title=beardy-os
 
 
   # TODO: switch to sysext for 1password: https://universal-blue.discourse.group/t/installing-1password-in-bluefin-a-better-way/5442/2, https://github.com/travier/fedora-sysexts
   - type: bling
     install:
-      - rpmfusion
+      # - rpmfusion
       - ublue-update
       - 1password
       - dconf-update-service
 
   - type: rpm-ostree
-    # repos:
+    repos:
+      - https://copr.fedorainfracloud.org/coprs/gmaglione/podman-bootc/repo/fedora-%OS_VERSION%/gmaglione-podman-bootc-fedora-%OS_VERSION%.repo
     #   # - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
     install:
+      - tig
       - qemu
       - libvirt
       - virt-manager
       - osbuild-selinux
-      # - podman-compose
+      - podman-bootc
+      - cockpit-bridge
+      - cockpit-machines
+      - cockpit-navigator
+      - cockpit-networkmanager
+      - cockpit-ostree
+      - cockpit-podman
+      - cockpit-selinux
+      - cockpit-storaged
+      - cockpit-system
+      - podman-compose
+      - libvirt-client
+      - virt-install
+      - btrfs-assistant
+      - btrfsmaintenance
+      - dbus-daemon
+      - dbus-tools
+      - fastfetch
+      - ptyxis
+      - setroubleshoot-plugins
+      - setroubleshoot-server
+      - usermode
+      - virt-install
+      - virt-manager
+      - virt-what
+      - xdg-user-dirs
+      - xdg-user-dirs-gtk
       # - chromium
       # - micro
       # - starship
@@ -55,9 +84,6 @@ modules:
     notify: true # Send notification after install/uninstall is finished (true/false)
     system:
       # If no repo information is specified, Flathub will be used by default
-      repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
-      repo-name: flathub
-      repo-title: "Flathub (system-wide)" # Optional; this sets the remote's user-facing name in graphical frontends like GNOME Software
       install:
         - com.github.tchx84.Flatseal
         - com.google.Chrome
@@ -71,8 +97,9 @@ modules:
         - io.podman_desktop.PodmanDesktop
         - org.cockpit_project.CockpitClient
         - org.fedoraproject.MediaWriter
-      # remove:
-      # - org.gnome.eog
+      remove:
+        - org.gnome.eog
+    user: {} # Also add Flathub user repo, but no user packages
 
   # - type: fonts
   #   fonts:
