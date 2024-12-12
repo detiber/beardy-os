@@ -9,10 +9,8 @@
           "wheel",
           "sudo"
         ],
-        "name": "core",
-        "sshAuthorizedKeys": [
-          "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIDFeiGuhMVEvVcRI8/yb1U6SkdNnv4OaBlfbcEWkKhafAAAABHNzaDo="
-        ]
+        "name": "beardy",
+        "passwordHash": "$y$j9T$tbyWDWRYvUexStMTIm1V3.$CrVaQUisIEE2PnZ5MgqBlrib3VPdID.qo.lF2E2Sk96"
       }
     ]
   },

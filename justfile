@@ -43,7 +43,7 @@ generate-all: generate-ignition
 [group('ignition')]
 generate-ignition:
   for file in `ls hack/*.butane`; do \
-    just generate-ignition-for ${file}; \
+    just _generate-ignition-for ${file}; \
   done
 
 _generate-ignition-for butane_config:
@@ -117,12 +117,13 @@ _bluebuild-containerfile recipe output_dir:
     bluebuild generate -o /output/Containerfile {{recipe}}
 
 _bluebuild-iso recipe output_dir image_name image variant:
-  echo sudo podman run -it --rm \
+  sudo podman run -it --rm \
     --privileged \
     --pull=newer \
     --security-opt label=type:unconfined_t \
     -v '{{absolute_path(".")}}':/bluebuild \
     -v '{{output_dir}}':/output \
+    {{bluebuild-image}} \
     bluebuild generate-iso \
     -R podman \
     --variant {{variant}} \
@@ -166,3 +167,81 @@ clean-bib-output:
 [group('bluebuild')]
 clean-bluebuild-output:
   rm -rf build/bluebuild/output
+
+coreos-installer-version := "release"
+coreos-installer-image := "quay.io/coreos/coreos-installer:" + coreos-installer-version
+coreos-pxe-output-dir := join(common-build-dir, "coreos", "pxe")
+coreos-pxe: (_ensure-directory coreos-pxe-output-dir)
+  podman run --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{coreos-pxe-output-dir}}':/data \
+    -w /data \
+    {{coreos-installer-image}} \
+    download -f pxe
+
+coreos-pxe-customize: (_ensure-directory coreos-pxe-output-dir)
+  podman run --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{coreos-pxe-output-dir}}':/data \
+    -v '{{absolute_path("./hack/base.ign")}}':/config/config.ign \
+    -w /data \
+    {{coreos-installer-image}} \
+    pxe customize \
+    --dest-device /dev/vda \
+    --dest-ignition /config/config.ign \
+    -o /data/wrapped-initramfs.img \
+    fedora-coreos-41.20241109.3.0-live-initramfs.x86_64.img
+
+coreos-iso-output-dir := join(common-build-dir, "coreos", "iso")
+coreos-iso: (_ensure-directory coreos-iso-output-dir)
+  podman run --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{coreos-iso-output-dir}}':/data \
+    -w /data \
+    {{coreos-installer-image}} \
+    download -f iso
+
+coreos-iso-customize: (_ensure-directory coreos-iso-output-dir)
+  podman run --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{coreos-iso-output-dir}}':/data \
+    -v '{{absolute_path("./hack/base.ign")}}':/config/config.ign \
+    -w /data \
+    {{coreos-installer-image}} \
+    iso customize \
+    --dest-device /dev/vda \
+    --dest-ignition /config/config.ign \
+    -o /data/coreos-custom.iso \
+    fedora-coreos-41.20241109.3.0-live.x86_64.iso
+
+coreos-iso-rebase: (_ensure-directory coreos-iso-output-dir)
+  podman run --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{coreos-iso-output-dir}}':/data \
+    -v '{{absolute_path("./hack/beardy-autorebase.ign")}}':/config/config.ign \
+    -w /data \
+    {{coreos-installer-image}} \
+    iso customize \
+    --dest-device /dev/vda \
+    --dest-ignition /config/config.ign \
+    -o /data/coreos-rebase-beardy.iso \
+    fedora-coreos-41.20241109.3.0-live.x86_64.iso
+
+coreos-iso-switch: (_ensure-directory coreos-iso-output-dir)
+  podman run --rm \
+    --pull=newer \
+    --security-opt label=type:unconfined_t \
+    -v '{{coreos-iso-output-dir}}':/data \
+    -v '{{absolute_path("./hack/beardy-bootc-switch.ign")}}':/config/config.ign \
+    -w /data \
+    {{coreos-installer-image}} \
+    iso customize \
+    --dest-device /dev/vda \
+    --dest-ignition /config/config.ign \
+    -o /data/coreos-switch-beardy.iso \
+    fedora-coreos-41.20241109.3.0-live.x86_64.iso
