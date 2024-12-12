@@ -6,7 +6,7 @@ beardy-version := "latest"
 beardy-repo := "ghcr.io/detiber"
 #beardy-image := beardy-repo + "/beardy-os:" + beardy-version
 
-# Using main to bring in --tmpdir arg, can change back to latest once that feature is released
+# Using main to bring in --tempdir arg, can change back to latest once that feature is released
 bluebuild-version := "main"
 bluebuild-image := "ghcr.io/blue-build/cli:" + bluebuild-version
 
@@ -145,7 +145,7 @@ _bluebuild-iso recipe output_dir image_name image variant: \
     {{bluebuild-image}} \
     bluebuild generate-iso \
     -R podman \
-    --tmpdir /build_tmp \
+    --tempdir /build_tmp \
     -o /output \
     --variant {{variant}} \
     --iso-name "{{image_name}}-{{variant}}.iso" \
