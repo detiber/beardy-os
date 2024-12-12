@@ -56,11 +56,14 @@ RUN \
 RUN \
 --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
 --mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
-dnf5 -y install osbuild-selinux && \
+dnf5 -y install glibc-locale-source glibc-langpack-en osbuild-selinux && \
 dnf5 -y copr enable gmaglione/podman-bootc && \
 dnf5 -y install podman-bootc && \
 ostree container commit
 
+RUN localedef -i en_US -f UTF-8 en_US.UTF-8
+RUN echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
+RUN ln -s -f /usr/share/zoneinfo/America/New_York /etc/localtime
 
 # bluebuild: Key RUN
 RUN --mount=type=bind,from=stage-keys,src=/keys,dst=/tmp/keys \
@@ -122,6 +125,7 @@ virt-what \
 xdg-user-dirs \
 xdg-user-dirs-gtk \
 tig \
+libguestfs \
 && ostree container commit
 
 # TODO: ublue-update
@@ -155,6 +159,8 @@ RUN \
   --mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
   /tmp/scripts/run_module.sh 'systemd' '{"type":"systemd","system":{"enabled":["podman.socket","sshd.service"]}}' \
   && ostree container commit
+
+RUN bootc container lint
 
 # # bluebuild: post_build.sh clears out /tmp/* and /var/* and does a commit
 # RUN --mount=type=bind,from=ghcr.io/blue-build/cli/build-scripts:a8cac2adc90fa842e4565bc1825e588df4f5bcbd,src=/scripts/,dst=/scripts/ \

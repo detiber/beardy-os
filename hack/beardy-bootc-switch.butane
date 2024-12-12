@@ -26,7 +26,7 @@ systemd:
         [Service]
         Type=oneshot
         StandardOutput=journal+console
-        ExecStart=/usr/bin/bootc switch ghcr.io/detiber/beardy-os:latest
+        ExecStart=/usr/bin/bootc switch ghcr.io/detiber/beardy-os-base:latest
         ExecStart=/usr/bin/touch /etc/ucore-autobootcswitch/unverified
         ExecStart=/usr/bin/systemctl disable ucore-unsigned-autobootcswitch.service
         ExecStart=/usr/bin/systemctl reboot
@@ -44,7 +44,7 @@ systemd:
         [Service]
         Type=oneshot
         StandardOutput=journal+console
-        ExecStart=/usr/bin/bootc switch --enforce-container-sigpolicy ghcr.io/detiber/beardy-os:latest
+        ExecStart=/usr/bin/bootc switch --enforce-container-sigpolicy ghcr.io/detiber/beardy-os-base:latest
         ExecStart=/usr/bin/touch /etc/ucore-autobootcswitch/signed
         ExecStart=/usr/bin/systemctl disable ucore-signed-autobootcswitch.service
         ExecStart=/usr/bin/systemctl reboot

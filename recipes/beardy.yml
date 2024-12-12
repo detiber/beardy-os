@@ -66,6 +66,9 @@ modules:
       - virt-what
       - xdg-user-dirs
       - xdg-user-dirs-gtk
+      - glibc-locale-source
+      - glibc-langpack-en
+      - libguestfs
       # - chromium
       # - micro
       # - starship
@@ -161,5 +164,10 @@ modules:
   - type: script
     scripts:
       - unwrap-cli.sh
+    snippets:
+      - "localedef -i en_US -f UTF-8 en_US.UTF-8"
+      - "echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf"
+      - "ln -s -f /usr/share/zoneinfo/America/New_York /etc/localtime"
+      - "bootc container lint"
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
