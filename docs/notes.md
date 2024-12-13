@@ -23,3 +23,11 @@
   - current iso-based systems basically seem to deploy an entire separate os for bootstrapping
   - even configuring auto-rebase through kickstart takes too long, multiple deploy, write, reboot stages
   - leverage something like capt-based deployment???
+
+  ## build-container-installer
+
+  - possibly use https://github.com/JasonN3/build-container-installer/wiki/development_vscode, for windows-based dev?
+
+## anaconda
+  - logging: https://docs.fedoraproject.org/en-US/quick-docs/anaconda-logging/#_introduction
+    - `ctrl-b-<tab number>` works for tmux session when `Alt+Tab` is unavailable (such as accessing vm console via Cockpit)
