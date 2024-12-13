@@ -1,6 +1,14 @@
 # Base bootc image
 FROM quay.io/fedora/fedora-bootc:41
 
+ARG LANG="en_US.UTF-8"
+ARG TZ="America/New_York"
+ARG lang_charmap="UTF-8"
+ARG lang_inputfile="en_US"
+
+ENV LANG $LANG
+ENV TZ $TZ
+
 # Install required packages
 RUN \
 --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
@@ -10,9 +18,9 @@ dnf5 -y copr enable gmaglione/podman-bootc && \
 dnf5 -y install podman-bootc && \
 ostree container commit
 
-RUN localedef -i en_US -f UTF-8 en_US.UTF-8
-RUN echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
-RUN ln -s -f /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN localedef -i ${lang_inputfile} -f ${lang_charmap} en_US.UTF-8
+RUN echo "LANG=\"${LANG}\"" > /etc/locale.conf
+RUN ln -s -f "/usr/share/zoneinfo/${TZ}" /etc/localtime
 RUN echo "%wheel         ALL = (ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel-nopassword
 
 # Install additional packages
