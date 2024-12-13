@@ -131,6 +131,7 @@ xdg-user-dirs \
 xdg-user-dirs-gtk \
 tig \
 libguestfs \
+lorax \
 && ostree container commit
 
 # TODO: ublue-update

@@ -57,6 +57,7 @@ xdg-user-dirs \
 xdg-user-dirs-gtk \
 tig \
 libguestfs \
+lorax \
 && ostree container commit
 
 RUN bootc container lint

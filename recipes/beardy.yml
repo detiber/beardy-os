@@ -71,6 +71,7 @@ modules:
       - glibc-locale-source
       - glibc-langpack-en
       - libguestfs
+      - lorax
       # - chromium
       # - micro
       # - starship
