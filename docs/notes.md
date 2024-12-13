@@ -27,7 +27,21 @@
   ## build-container-installer
 
   - possibly use https://github.com/JasonN3/build-container-installer/wiki/development_vscode, for windows-based dev?
+  - additional_templates - need examples/docs...  lorax templates, but lorax docs are pretty obtuse
+  - extra_boot_params - maybe can use to inject additional anaconda config, similart to bootc-image-builder config?
+  - how to inject LANG to work around iso install issue related to locale????
 
 ## anaconda
   - logging: https://docs.fedoraproject.org/en-US/quick-docs/anaconda-logging/#_introduction
     - `ctrl-b-<tab number>` works for tmux session when `Alt+Tab` is unavailable (such as accessing vm console via Cockpit)
+
+## rabbit holes:
+  - using osbuild tooling?
+    - building ostree images: https://osbuild.org/docs/on-premises/commandline/building-ostree-images
+    - blueprint config ref: https://osbuild.org/docs/user-guide/blueprint-reference
+    - output formats: https://osbuild.org/docs/user-guide/introduction#image-builder-output-formats
+    - bootc-image-builder: https://osbuild.org/docs/bootc/
+  - bootable containers upstream: https://containers.github.io/bootable/
+  - bootc upstream: https://containers.github.io/bootc/
+  - ostree upstream: https://ostreedev.github.io/ostree/
+  
