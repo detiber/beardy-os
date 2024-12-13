@@ -111,6 +111,7 @@ cockpit-podman \
 cockpit-selinux \
 cockpit-storaged \
 cockpit-system \
+cockpit-composer \
 podman-compose \
 libvirt-client \
 virt-install \
