@@ -322,18 +322,6 @@ bootc-install-disk image filename additional_args="": \
     + "--generic-image --via-loopback /output/" + filename \
     + " " + additional_args)
 
-# bootc-base-image-name := "beardy-os-base"
-# bootc-base-image := beardy-repo + "/" + bib-base-image-name + ":" + beardy-version
-# bootc-base-image := "ghcr.io/ublue-os/base-main:latest"
-# bootc-base-image-filename := "beardy-base.raw"
-# bootc-base-install-args := "install to-disk " \
-#   + " --wipe --filesystem=btrfs" \
-#   + " --generic-image --via-loopback /output/" \
-#   + bootc-base-image-filename
-# bootc-install-disk: \
-#   (_bootc-create-file bootc-base-image-filename) \
-#   && (_bootc bootc-base-image bootc-base-install-args)
-
 local-build tag containerfile additional_args="":
   sudo podman build \
     {{additional_args}} \
@@ -416,7 +404,7 @@ local-bib-iso-bootc-base: \
     local-bib-bootc-base-image-output-dir)
 
 local-bootc-install-ublue-base: \
-  (local-build-bootc-base) \
+  (local-build-ublue-base) \
   && (bootc-install-disk
     local-build-ublue-base-image
     "beardy-ublue.raw"

@@ -1,11 +1,11 @@
 # Base bootc image
-FROM ghcr.io/ublue-os/base-main:latest
+FROM quay.io/fedora/fedora-bootc:41
 
 # Install required packages
 RUN \
 --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
 --mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
-dnf5 -y install glibc-locale-source glibc-langpack-en osbuild-selinux && \
+dnf5 -y install glibc-locale-source glibc-langpack-en osbuild-selinux dnf5-plugins && \
 dnf5 -y copr enable gmaglione/podman-bootc && \
 dnf5 -y install podman-bootc && \
 ostree container commit
@@ -13,6 +13,7 @@ ostree container commit
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 RUN echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
 RUN ln -s -f /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN echo "%wheel         ALL = (ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel-nopassword
 
 # Install additional packages
 RUN \

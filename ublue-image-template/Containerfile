@@ -64,6 +64,7 @@ ostree container commit
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 RUN echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
 RUN ln -s -f /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN echo "%wheel         ALL = (ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel-nopassword
 
 # bluebuild: Key RUN
 RUN --mount=type=bind,from=stage-keys,src=/keys,dst=/tmp/keys \
