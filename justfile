@@ -133,7 +133,7 @@ _bluebuild-containerfile recipe output_dir:
     {{bluebuild-image}} \
     bluebuild generate -o /output/Containerfile {{recipe}}
 
-_bluebuild-iso recipe output_dir image_name image variant: \
+_bluebuild-iso output_dir image_name variant args: \
   (_ensure-directory common-bluebuild-tmp-dir)
   sudo podman run -it --rm \
     --privileged \
@@ -144,12 +144,20 @@ _bluebuild-iso recipe output_dir image_name image variant: \
     -v '{{common-bluebuild-tmp-dir}}':/build_tmp \
     {{bluebuild-image}} \
     bluebuild generate-iso \
-    -R podman \
     --tempdir /build_tmp \
     -o /output \
     --variant {{variant}} \
     --iso-name "{{image_name}}-{{variant}}.iso" \
-    image {{image}}
+    -R podman -B podman -I podman \
+    {{args}}
+
+_bluebuild-iso-from-image output_dir image_name image variant: \
+  (_ensure-directory common-bluebuild-tmp-dir) \
+  && (_bluebuild-iso output_dir image_name variant "image " + image)
+
+_bluebuild-iso-from-recipe output_dir image_name recipe variant: \
+  (_ensure-directory common-bluebuild-tmp-dir) \
+  && (_bluebuild-iso output_dir image_name variant "recipe " + recipe)
 
 bluebuild-beardy-output-dir := join(common-bluebuild-output-dir,
   "beardy")
@@ -169,8 +177,7 @@ bluebuild-containerfile-beardy: \
 [group('bluebuild')]
 bluebuild-iso-beardy-server: \
   (_ensure-directory bluebuild-beardy-output-dir) \
-  && (_bluebuild-iso
-    bluebuild-beardy-recipe-file
+  && (_bluebuild-iso-from-image
     bluebuild-beardy-output-dir
     bluebuild-beardy-image-name
     bluebuild-beardy-image
@@ -178,10 +185,19 @@ bluebuild-iso-beardy-server: \
 
 [group('iso')]
 [group('bluebuild')]
+bluebuild-local-iso-beardy-server: \
+  (_ensure-directory bluebuild-beardy-output-dir) \
+  && (_bluebuild-iso-from-recipe
+    bluebuild-beardy-output-dir
+    bluebuild-beardy-image-name
+    bluebuild-beardy-recipe-file
+    "server")
+
+[group('iso')]
+[group('bluebuild')]
 bluebuild-iso-beardy-kinoite: \
   (_ensure-directory bluebuild-beardy-output-dir) \
-  && (_bluebuild-iso
-    bluebuild-beardy-recipe-file
+  && (_bluebuild-iso-from-image
     bluebuild-beardy-output-dir
     bluebuild-beardy-image-name
     bluebuild-beardy-image
@@ -189,13 +205,32 @@ bluebuild-iso-beardy-kinoite: \
 
 [group('iso')]
 [group('bluebuild')]
+bluebuild-local-iso-beardy-kinoite: \
+  (_ensure-directory bluebuild-beardy-output-dir) \
+  && (_bluebuild-iso-from-recipe
+    bluebuild-beardy-output-dir
+    bluebuild-beardy-image-name
+    bluebuild-beardy-recipe-file
+    "kinoite")
+
+[group('iso')]
+[group('bluebuild')]
 bluebuild-iso-beardy-silverblue: \
   (_ensure-directory bluebuild-beardy-output-dir) \
-  && (_bluebuild-iso
-    bluebuild-beardy-recipe-file
+  && (_bluebuild-iso-from-image
     bluebuild-beardy-output-dir
     bluebuild-beardy-image-name
     bluebuild-beardy-image
+    "silverblue")
+
+[group('iso')]
+[group('bluebuild')]
+bluebuild-local-iso-beardy-silverblue: \
+  (_ensure-directory bluebuild-beardy-output-dir) \
+  && (_bluebuild-iso-from-recipe
+    bluebuild-beardy-output-dir
+    bluebuild-beardy-image-name
+    bluebuild-beardy-recipe-file
     "silverblue")
 
 [group('clean')]
@@ -355,7 +390,7 @@ _local-bib-image image output_dir: \
     common-bib-image-config
     local-bib-image-args)
 
-local-bib-iso-args := common-bib-image-args + " --local"
+local-bib-iso-args := common-bib-iso-args + " --local"
 _local-bib-iso image output_dir: \
   && (_bib
     image
