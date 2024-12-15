@@ -16,6 +16,12 @@ jobs:
   build-image-stable:
     name: Build Stable Images
     uses: ./.github/workflows/bluefin-reusable-build.yml
+
+    permissions:
+        contents: read
+        packages: write
+        id-token: write
+
     secrets: inherit
     strategy:
       fail-fast: false
