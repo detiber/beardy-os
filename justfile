@@ -28,5 +28,7 @@ fix:
     	echo "Checking syntax: $file"
     	just --unstable --fmt -f $file
     done
-    echo "Checking syntax: justfile"
-    just --unstable --fmt -f justfile || { exit 1; }
+    find {{ root-dir }} -type f -name "justfile" | while read -r file; do
+        echo "Checking syntax: $file"
+        just --unstable --fmt -f $file
+    done

@@ -10,11 +10,13 @@ images := '(
     [beardy-bluefin]=beardy-bluefin
     [beardy-bluefin-dx]=beardy-bluefin-dx
 )'
+
 # ignore flavors, if we want to layer on top of
 # these images, we should probably just layer on
 # top of the upstream image rather than building
 # as a flavor
 # might come in handy later, though
+
 flavors := '(
     [main]=main
     # [nvidia]=nvidia
@@ -29,7 +31,6 @@ tags := '(
     [stable]=stable
     [latest]=latest
 )'
-
 bluefin-build-dir := join(build-dir, 'output', 'variants', 'bluefin')
 bluefin-cache-dir := join(build-dir, 'cache', 'bluefin')
 
@@ -47,8 +48,8 @@ clean:
     rm -f previous.manifest.json
     rm -f changelog.md
     rm -f output.env
-    rm -f {{bluefin-build-dir}}
-    rm -f {{bluefin-cache-dir}}
+    rm -f {{ bluefin-build-dir }}
+    rm -f {{ bluefin-cache-dir }}
 
 # Sudo Clean Repo
 [group('Utility')]
@@ -236,8 +237,7 @@ rechunk-dir := join(bluefin-cache-dir, 'rechunk')
 # Rechunk Image
 [group('Image')]
 [private]
-rechunk image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0": \
-  (_ensure-directory rechunk-dir)
+rechunk image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0": (_ensure-directory rechunk-dir)
     #!/usr/bin/bash
     set -eoux pipefail
 
@@ -329,8 +329,8 @@ rechunk image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0":
     just sudoif podman run --rm \
         --pull=newer \
         --security-opt label=disable \
-        --volume "{{rechunk-dir}}:/workspace" \
-        --volume "{{root-dir}}:/var/git" \
+        --volume "{{ rechunk-dir }}:/workspace" \
+        --volume "{{ root-dir }}:/var/git" \
         --volume cache_ostree:/var/ostree \
         --env REPO=/var/ostree/repo \
         --env PREV_REF=ghcr.io/detiber/"${image_name}":"${tag}" \
@@ -348,16 +348,16 @@ rechunk image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0":
 
     # Fix Permissions of OCI
     if [[ "${UID}" -gt "0" ]]; then
-        just sudoif chown "${UID}:${GROUPS}" -R "{{rechunk-dir}}"
+        just sudoif chown "${UID}:${GROUPS}" -R "{{ rechunk-dir }}"
     elif [[ -n "${SUDO_UID:-}" ]]; then
-        chown "${SUDO_UID}":"${SUDO_GID}" -R "{{rechunk-dir}}"
+        chown "${SUDO_UID}":"${SUDO_GID}" -R "{{ rechunk-dir }}"
     fi
 
     # Remove cache_ostree
     just sudoif podman volume rm cache_ostree
 
     # Show OCI Labels
-    just sudoif skopeo inspect oci:"{{rechunk-dir}}"/"${OUT_NAME}" | jq -r '.Labels'
+    just sudoif skopeo inspect oci:"{{ rechunk-dir }}"/"${OUT_NAME}" | jq -r '.Labels'
 
     # Pipeline Checks
     if [[ {{ pipeline }} == "1" && -n "${SUDO_USER:-}" ]]; then
@@ -379,7 +379,7 @@ load-rechunk image="beardy-bluefin" tag="latest" flavor="main":
 
     # Load Image
     OUT_NAME="${image_name}_build"
-    IMAGE=$(podman pull oci:"{{rechunk-dir}}"/"${OUT_NAME}")
+    IMAGE=$(podman pull oci:"{{ rechunk-dir }}"/"${OUT_NAME}")
     podman tag ${IMAGE} localhost/"${image_name}":{{ tag }}
 
     # Cleanup
@@ -415,9 +415,7 @@ iso-build-dir := join(bluefin-build-dir, 'iso')
 
 # Build ISO
 [group('ISO')]
-build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0": \
-  (_ensure-directory iso-cache-dir) \
-  (_ensure-directory iso-build-dir)
+build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0": (_ensure-directory iso-cache-dir) (_ensure-directory iso-build-dir)
     #!/usr/bin/bash
     set -eoux pipefail
 
@@ -431,7 +429,7 @@ build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0
     # Image Name
     image_name=$(just image_name {{ image }} {{ tag }} {{ flavor }})
 
-    if [[ -f "{{iso-build-dir}}/${image_name}-${tag}.iso" || -f "{{iso-build-dir}}/${image_name}-${tag}.iso-CHECKSUM" ]]; then
+    if [[ -f "{{ iso-build-dir }}/${image_name}-${tag}.iso" || -f "{{ iso-build-dir }}/${image_name}-${tag}.iso-CHECKSUM" ]]; then
         echo "ERROR - ISO or Checksum already exist. Please mv or rm to build new ISO"
         exit 1
     fi
@@ -461,7 +459,7 @@ build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0
     FLATPAK_DIR_SHORTNAME="beardy_flatpaks"
 
     # Generate Flatpak List
-    TEMP_FLATPAK_INSTALL_DIR="$(mktemp -d -p {{iso-cache-dir}} flatpak-XXXXX)"
+    TEMP_FLATPAK_INSTALL_DIR="$(mktemp -d -p {{ iso-cache-dir }} flatpak-XXXXX)"
     flatpak_refs=()
     while IFS= read -r line; do
         flatpak_refs+=("$line")
@@ -493,11 +491,11 @@ build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0
     flatpak_list_args+=("--entrypoint" "/usr/bin/bash")
     flatpak_list_args+=("--env" "FLATPAK_SYSTEM_DIR=/flatpak/flatpak")
     flatpak_list_args+=("--env" "FLATPAK_TRIGGERSDIR=/flatpak/triggers")
-    flatpak_list_args+=("--volume" "{{iso-build-dir}}:/output")
+    flatpak_list_args+=("--volume" "{{ iso-build-dir }}:/output")
     flatpak_list_args+=("--volume" "${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir")
     flatpak_list_args+=("${IMAGE_FULL}" /temp_flatpak_install_dir/install-flatpaks.sh)
 
-    if [[ ! -f "{{iso-build-dir}}/flatpaks-with-deps" ]]; then
+    if [[ ! -f "{{ iso-build-dir }}/flatpaks-with-deps" ]]; then
         podman run "${flatpak_list_args[@]}"
     else
         echo "WARNING - Reusing previous determined flatpaks-with-deps"
@@ -508,7 +506,7 @@ build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0
     fi
 
     # List Flatpaks with Dependencies
-    cat "{{iso-build-dir}}/flatpaks-with-deps"
+    cat "{{ iso-build-dir }}/flatpaks-with-deps"
 
     # Build ISO
     iso_build_args=()
@@ -516,7 +514,7 @@ build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0
     if [[ "{{ ghcr }}" == "0" ]]; then
     	iso_build_args+=(--volume "/var/lib/containers/storage:/var/lib/containers/storage")
     fi
-    iso_build_args+=(--volume "{{iso-build-dir}}:/github/workspace/build")
+    iso_build_args+=(--volume "{{ iso-build-dir }}:/github/workspace/build")
     iso_build_args+=("{{ iso_builder_image }}")
     iso_build_args+=(ARCH="x86_64")
     iso_build_args+=(ENROLLMENT_PASSWORD="universalblue")
@@ -537,11 +535,11 @@ build-iso image="beardy-bluefin" tag="latest" flavor="main" ghcr="0" pipeline="0
     just sudoif podman run "${iso_build_args[@]}"
 
     if [[ "${UID}" -gt "0" ]]; then
-        just sudoif chown "${UID}:${GROUPS}" -R "{{iso-build-dir}}"
-        just sudoif chown "${UID}:${GROUPS}" -R "{{iso-cache-dir}}"
+        just sudoif chown "${UID}:${GROUPS}" -R "{{ iso-build-dir }}"
+        just sudoif chown "${UID}:${GROUPS}" -R "{{ iso-cache-dir }}"
     elif [[ -n "${SUDO_UID:-}" ]]; then
-        chown "${SUDO_UID}":"${SUDO_GID}" -R "{{iso-build-dir}}"
-        chown "${SUDO_UID}":"${SUDO_GID}" -R "{{iso-cache-dir}}"
+        chown "${SUDO_UID}":"${SUDO_GID}" -R "{{ iso-build-dir }}"
+        chown "${SUDO_UID}":"${SUDO_GID}" -R "{{ iso-cache-dir }}"
     fi
 
 # Build ISO using GHCR Image
@@ -565,7 +563,7 @@ run-iso image="beardy-bluefin" tag="latest" flavor="main":
     image_name=$(just image_name {{ image }} {{ tag }} {{ flavor }})
 
     # Check if ISO Exists
-    if [[ ! -f "{{iso-build-dir}}/${image_name}-${tag}.iso" ]]; then
+    if [[ ! -f "{{ iso-build-dir }}/${image_name}-${tag}.iso" ]]; then
         just build-iso "$image" "$tag" "$flavor"
     fi
 
@@ -587,7 +585,7 @@ run-iso image="beardy-bluefin" tag="latest" flavor="main":
     run_args+=(--env "TPM=Y")
     run_args+=(--env "GPU=Y")
     run_args+=(--device=/dev/kvm)
-    run_args+=(--volume "{{iso-build-dir}}/${image_name}-${tag}.iso":"/boot.iso")
+    run_args+=(--volume "{{ iso-build-dir }}/${image_name}-${tag}.iso":"/boot.iso")
     run_args+=(docker.io/qemux/qemu-docker)
     podman run "${run_args[@]}" &
     xdg-open http://localhost:${port}
