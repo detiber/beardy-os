@@ -12,11 +12,13 @@ default:
 check:
     #!/usr/bin/bash
     find {{ root-dir }} -type f -name "*.just" | while read -r file; do
-    	echo "Checking syntax: $file"
-    	just --unstable --fmt --check -f $file
+        echo "Checking syntax: $file"
+        just --unstable --fmt --check -f $file
     done
-    echo "Checking syntax: justfile"
-    just --unstable --fmt --check -f justfile
+    find {{ root-dir }} -type f -name "justfile" | while read -r file; do
+        echo "Checking syntax: $file"
+        just --unstable --fmt --check -f $file
+    done
 
 # Fix Just Syntax
 [group('Just')]

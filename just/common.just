@@ -23,3 +23,20 @@ sudoif command *args:
         fi
     }
     sudoif {{ command }} {{ args }}
+
+# Generate Default Tag
+[group('Utility')]
+generate-default-tag tag="latest" ghcr="0":
+    #!/usr/bin/bash
+    set -eou pipefail
+
+    # Default Tag
+    if [[ "{{ tag }}" =~ stable && "{{ ghcr }}" == "1" ]]; then
+        DEFAULT_TAG="stable-daily"
+    elif [[ "{{ tag }}" =~ stable && "{{ ghcr }}" == "0" ]]; then
+        DEFAULT_TAG="stable"
+    else
+        DEFAULT_TAG="{{ tag }}"
+    fi
+
+    echo "${DEFAULT_TAG}"
