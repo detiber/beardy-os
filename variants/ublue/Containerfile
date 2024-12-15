@@ -1,3 +1,6 @@
+FROM scratch AS ctx
+COPY / /
+
 # Base ublue image
 FROM ghcr.io/ublue-os/base-main:latest
 
@@ -9,7 +12,13 @@ ARG lang_inputfile="en_US"
 ENV LANG $LANG
 ENV TZ $TZ
 
-# TODO: run unwrap-cli script
+# Build, cleanup, commit.
+RUN \
+  --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
+  --mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
+  --mount=type=bind,from=ctx,source=/,target=/ctx \
+  /ctx/scripts/unwrap-cli.sh
+
 # TODO: add 1password
 # TODO: add ublue-update
 
