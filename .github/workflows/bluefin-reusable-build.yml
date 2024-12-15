@@ -79,15 +79,25 @@ jobs:
         with:
           remove-codeql: true
 
+    # submodule variables are not able to be set on the commandline today
+    #   - name: Build Image
+    #     id: build-image
+    #     shell: bash
+    #     run: |
+    #       sudo just repo_organization="${{ github.repository_owner }}" \
+    #                 bluefin::build-ghcr "${{ matrix.base_name }}" \
+    #                            "${{ matrix.stream_name }}" \
+    #                            "${{ matrix.image_flavor }}" \
+    #                            ""
+
       - name: Build Image
         id: build-image
         shell: bash
         run: |
-          sudo just repo_organization="${{ github.repository_owner }}" \
-                    bluefin::build-ghcr "${{ matrix.base_name }}" \
+          sudo just bluefin::build-ghcr "${{ matrix.base_name }}" \
                                "${{ matrix.stream_name }}" \
                                "${{ matrix.image_flavor }}" \
-                               ""
+
 
       - name: Rechunk Image
         id: rechunk-image
