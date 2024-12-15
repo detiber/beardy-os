@@ -1,0 +1,33 @@
+name = "beardy-os"
+description = "The preferred OS for bearded developers."
+version = "0.0.1"
+
+distro = "???"
+
+[customizations]
+hostname = "beardy"
+
+[[customizations.user]]
+name = "beardy"
+groups = ["wheel"]
+
+[[customizations.timezone]]
+timezone = "US/Eastern"
+
+[[customizations.locale]]
+languages = ["en_US.UTF-8"]
+keyboard = "us"
+
+[customizations.installer]
+unattended = true
+sudo-nopasswd = ["user", "%wheel"]
+
+[customizations.installer.kickstart]
+contents = """
+text --non-interactive
+zerombr
+clearpart --all --initlabel --disklabel=gpt
+autopart --noswap --type=lvm
+network --bootproto=dhcp --device=link --activate --onboot=on
+"""
+

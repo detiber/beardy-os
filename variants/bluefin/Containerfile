@@ -1,0 +1,36 @@
+ARG BASE_VERSION="41"
+ARG BASE_IMAGE="ghcr.io/ublue-os/bluefin"
+ARG DX_BASE_IMAGE="ghcr.io/ublue-os/bluefin-dx"
+
+FROM scratch AS ctx
+COPY / /
+
+## base image section
+FROM ${BASE_IMAGE}:${BASE_VERSION} AS base
+
+ARG BASE_IMAGE_NAME="silverblue"
+ARG IMAGE_NAME="beardy-bluefin"
+ARG IMAGE_VENDOR="detiber"
+ARG SHA_HEAD_SHORT="dedbeef"
+ARG UBLUE_IMAGE_TAG="stable"
+ARG FEDORA_MAJOR_VERSION="41"
+
+# Build, cleanup, commit.
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    --mount=type=bind,from=ctx,source=/,target=/ctx \
+    /ctx/build_files/shared/build-base.sh
+
+## dx section
+FROM ${DX_BASE_IMAGE}:${BASE_VERSION} AS dx
+
+ARG BASE_IMAGE_NAME="silverblue"
+ARG IMAGE_NAME="beardy-bluefin-dx"
+ARG IMAGE_VENDOR="detiber"
+ARG SHA_HEAD_SHORT="dedbeef"
+ARG UBLUE_IMAGE_TAG="stable"
+ARG FEDORA_MAJOR_VERSION="41"
+
+# Build, Clean-up, Commit
+RUN --mount=type=cache,dst=/var/cache/rpm-ostree \
+    --mount=type=bind,from=ctx,source=/,target=/ctx \
+    /ctx/build_files/shared/build-dx.sh

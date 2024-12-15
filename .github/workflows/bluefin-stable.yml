@@ -1,0 +1,26 @@
+name: Stable Images
+on:
+  merge_group: # Make Stable-Daily run on merge groups
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+  schedule:
+    - cron: "50 6 * * 1,2,3,4,5,6" # 6:50 UTC everyday (1 hour after bluefin)
+    - cron: "50 6 * * 0" # 6:50 UTC sunday (1 hour after bluefin)
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build-image-stable:
+    name: Build Stable Images
+    uses: ./.github/workflows/bluefin-reusable-build.yml
+    secrets: inherit
+    strategy:
+      fail-fast: false
+      matrix:
+        brand_name: ["beardy-bluefin"]
+    with:
+      brand_name: ${{ matrix.brand_name }}
+      stream_name: stable

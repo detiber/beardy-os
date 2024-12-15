@@ -1,0 +1,25 @@
+# TODO: sort out a proper config
+# possibly use firstboot --reconfigure
+# possibly look into auto encrypting disk: https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html#autopart
+# additional bootloader options: https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html#bootloader
+# additional btrfs options: https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html#btrfs
+# use kecec option for reboot? https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html#reboot
+# is eula --agreed needed? https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html#eula
+[customizations.installer.kickstart]
+contents = """
+graphical --non-interactive
+lang en_US.UTF-8
+zerombr
+clearpart --all --initlabel --disklabel=gpt
+autopart --noswap --type btrfs
+network --bootproto=dhcp --device=link --activate --onboot=on
+timezone --utc America/New_York
+firstboot --enable
+reboot
+"""
+
+[customizations.installer.modules]
+enable = [
+  "org.fedoraproject.Anaconda.Modules.Localization",
+  "org.fedoraproject.Anaconda.Modules.Timezone"
+]

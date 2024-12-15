@@ -1,0 +1,89 @@
+# Base ublue image
+FROM ghcr.io/ublue-os/base-main:latest
+
+ARG LANG="en_US.UTF-8"
+ARG TZ="America/New_York"
+ARG lang_charmap="UTF-8"
+ARG lang_inputfile="en_US"
+
+ENV LANG $LANG
+ENV TZ $TZ
+
+# TODO: run unwrap-cli script
+# TODO: add 1password
+# TODO: add ublue-update
+
+# Install required packages
+RUN \
+--mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
+--mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
+dnf5 -y install glibc-locale-source glibc-langpack-en osbuild-selinux && \
+dnf5 -y copr enable gmaglione/podman-bootc && \
+dnf5 -y install podman-bootc && \
+ostree container commit
+
+RUN localedef -i ${lang_inputfile} -f ${lang_charmap} en_US.UTF-8
+RUN echo "LANG=\"${LANG}\"" > /etc/locale.conf
+RUN ln -s -f "/usr/share/zoneinfo/${TZ}" /etc/localtime
+RUN echo "%wheel         ALL = (ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel-nopassword
+
+# Install additional packages
+RUN \
+--mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
+--mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
+dnf5 -y install \
+cockpit-bridge \
+cockpit-machines \
+cockpit-navigator \
+cockpit-networkmanager \
+cockpit-ostree \
+cockpit-podman \
+cockpit-selinux \
+cockpit-storaged \
+cockpit-system \
+cockpit-composer \
+podman-compose \
+libvirt-client \
+virt-install \
+btrfs-assistant \
+btrfsmaintenance \
+dbus-daemon \
+dbus-tools \
+fastfetch \
+ptyxis \
+setroubleshoot-plugins \
+setroubleshoot-server \
+usermode \
+virt-install \
+virt-manager \
+virt-what \
+xdg-user-dirs \
+xdg-user-dirs-gtk \
+tig \
+libguestfs \
+lorax \
+&& ostree container commit
+
+RUN bootc container lint
+
+## Manage services
+# systemctl enable foo.service
+
+# TODO: re-enable signing
+# bluebuild: signing module
+# RUN \
+# --mount=type=bind,from=stage-files,src=/files,dst=/tmp/files,rw \
+# --mount=type=bind,from=stage-modules,src=/modules,dst=/tmp/modules,rw \
+# --mount=type=bind,from=ghcr.io/blue-build/cli/build-scripts:a8cac2adc90fa842e4565bc1825e588df4f5bcbd,src=/scripts/,dst=/tmp/scripts/ \
+# --mount=type=cache,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-beardy-os-latest,sharing=locked \
+# --mount=type=cache,dst=/var/cache/libdnf5,id=dnf-cache-beardy-os-latest,sharing=locked \
+# /tmp/scripts/run_module.sh 'signing' '{"type":"signing"}' \
+# && ostree container commit
+
+# Labels are added last since they cause cache misses with buildah
+LABEL org.opencontainers.image.title="beardy-os-ublue"
+LABEL org.opencontainers.image.description="The preferred ublue based OS for bearded developers."
+LABEL io.artifacthub.package.readme-url=https://raw.githubusercontent.com/detiber/beardy-os/main/README.md
+LABEL org.opencontainers.image.source=https://github.com/detiber/beardy-os
+LABEL org.opencontainers.image.url=https://github.com/detiber/beardy-os
+LABEL org.opencontainers.image.vendor=detiber

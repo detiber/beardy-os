@@ -1,0 +1,9 @@
+[customizations]
+
+[[customizations.user]]
+name = "beardy"
+groups = ["wheel"]
+
+[customizations.installer]
+unattended = true
+sudo-nopasswd = ["user", "%wheel"]

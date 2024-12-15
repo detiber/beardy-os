@@ -1,6 +1,0 @@
-# TODO: sort out a proper config
-[[customizations.user]]
-name = "detiber"
-password = "changeme"
-key = "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIDFeiGuhMVEvVcRI8/yb1U6SkdNnv4OaBlfbcEWkKhafAAAABHNzaDo="
-groups = ["wheel"]

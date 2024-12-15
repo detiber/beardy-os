@@ -1,0 +1,28 @@
+import '../../just/common.just'
+import '../../just/bib.just'
+
+# default recipe to display help information
+default:
+  @just --list
+
+beardy-bootc-version := beardy-version
+beardy-bootc-image-name := "beardy-os-bootc"
+beardy-bootc-image := beardy-repo + "/" \
+  + beardy-bootc-image-name + ":" + beardy-bootc-version
+
+_bib-bootc config args: \
+  && (_bib \
+    beardy-bootc-image \
+    join(build-dir, 'output', 'variants', 'bootc') \
+    join(build-dir, 'cache', 'bib') \
+    config \
+    args
+    )
+
+bib-qcow2: && (_bib-bootc \
+    join(source_directory(), 'bib-img-config.toml') \
+    "--type qcow2 --rootfs btrfs")
+
+bib-iso: && (_bib-bootc \
+    join(source_directory(), 'bib-iso-config.toml') \
+    "--type anaconda-iso")

@@ -1,0 +1,6 @@
+ublue_variants:
+  - label: detiber/beardy-bluefin
+    ks: /kickstart/beardy-os.ks
+    flavors:
+      - label: bluefin
+        info: Bluefin

@@ -1,0 +1,4 @@
+# TODO: sort out a proper config
+[[customizations.user]]
+name = "detiber"
+groups = ["wheel"]

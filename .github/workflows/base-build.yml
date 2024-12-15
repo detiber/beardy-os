@@ -35,12 +35,12 @@
           matrix:
             include:
               - base: bootc
-                containerfile: bootc/Containerfile
+                containerfile: variants/bootc/Containerfile
                 name: "${{ github.event.repository.name }}-bootc"  # the name of the image produced by this build, matches repo name appended with '-bootc'
                 description: "bootc-based base image for bearded developers"
 
               - base: ublue
-                containerfile: ublue-image-template/Containerfile
+                containerfile: variants/ublue/Containerfile
                 name: "${{ github.event.repository.name }}-ublue"  # the name of the image produced by this build, matches repo name appended with '-ublue'
                 description: "ublue-based base image for bearded developers"
         steps:
