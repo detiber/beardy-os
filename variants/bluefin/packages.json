@@ -1,7 +1,9 @@
 {
 	"all": {
 		"include": {
-			"all": [],
+			"all": [
+				"tig"
+			],
 			"silverblue": [],
 			"dx": []
 		},
