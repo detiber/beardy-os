@@ -1,5 +1,6 @@
 import '../../just/common.just'
 import '../../just/build.just'
+import '../../just/iso.just'
 
 ublue-build-dir := join(build-dir, 'output', 'variants', 'ublue')
 ublue-cache-dir := join(build-dir, 'cache', 'ublue')
@@ -22,3 +23,5 @@ load-rechunk image="beardy-ublue" tag="latest": && (_load-rechunk image tag rech
 secureboot image="beardy-ublue" tag="latest": && (_secureboot image tag)
 
 try: build rechunk load-rechunk secureboot
+
+build-iso source_image_ref="localhost/beardy-ublue:latest" out_dir=ublue-build-dir out_filename="beardy-ublue.iso": && (_build-iso source_image_ref out_dir out_filename)
