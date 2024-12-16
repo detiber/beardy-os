@@ -1,14 +1,14 @@
 name: Stable Images
 on:
-  merge_group: # Make Stable-Daily run on merge groups
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - "**.md"
-  schedule:
-    - cron: "50 6 * * 1,2,3,4,5,6" # 6:50 UTC everyday (1 hour after bluefin)
-    - cron: "50 6 * * 0" # 6:50 UTC sunday (1 hour after bluefin)
+  # merge_group: # Make Stable-Daily run on merge groups
+  # pull_request:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - "**.md"
+  # schedule:
+  #   - cron: "50 6 * * 1,2,3,4,5,6" # 6:50 UTC everyday (1 hour after bluefin)
+  #   - cron: "50 6 * * 0" # 6:50 UTC sunday (1 hour after bluefin)
   workflow_call:
   workflow_dispatch:
 
