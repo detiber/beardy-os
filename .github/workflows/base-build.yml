@@ -36,11 +36,13 @@
             include:
               - base: bootc
                 containerfile: variants/bootc/Containerfile
+                contextdir: variants/bootc/
                 name: "${{ github.event.repository.name }}-bootc"  # the name of the image produced by this build, matches repo name appended with '-bootc'
                 description: "bootc-based base image for bearded developers"
 
               - base: ublue
                 containerfile: variants/ublue/Containerfile
+                contextdir: variants/ublue
                 name: "${{ github.event.repository.name }}-ublue"  # the name of the image produced by this build, matches repo name appended with '-ublue'
                 description: "ublue-based base image for bearded developers"
         steps:
@@ -108,6 +110,7 @@
             id: build_image
             uses: redhat-actions/buildah-build@v2
             with:
+              context: ${{ contextdir }}
               containerfiles: |
                 ./${{ matrix.containerfile }}
               # Postfix image name with -custom to make it a little more descriptive
