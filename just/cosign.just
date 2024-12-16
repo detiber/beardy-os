@@ -1,6 +1,12 @@
-# Verify Container with Cosign
+import 'common.just'
+
+# Verify Container with Cosign TODO: remove after replacing use in bluefin justfile
 [group('Utility')]
-verify-container container="" registry="ghcr.io/ublue-os" key="":
+verify-container container="" registry="ghcr.io/ublue-os" key="https://raw.githubusercontent.com/ublue-os/main/main/cosign.pub": && (verify-image registry + "/" + container key)
+
+# Verify Container Image with Cosign
+[group('Utility')]
+verify-image image="ghcr.io/ublue-os/base-main" key="https://raw.githubusercontent.com/ublue-os/main/main/cosign.pub":
     #!/usr/bin/bash
     set -eoux pipefail
 
@@ -19,14 +25,8 @@ verify-container container="" registry="ghcr.io/ublue-os" key="":
         fi
     fi
 
-    # Public Key for Container Verification
-    key={{ key }}
-    if [[ -z "${key:-}" ]]; then
-        key="https://raw.githubusercontent.com/ublue-os/main/main/cosign.pub"
-    fi
-
     # Verify Container using cosign public key
-    if ! cosign verify --key "${key}" "{{ registry }}"/"{{ container }}" >/dev/null; then
+    if ! cosign verify --key "{{ key }}" "{{ image }}" >/dev/null; then
         echo "NOTICE: Verification failed. Please ensure your public key is correct."
         exit 1
     fi
