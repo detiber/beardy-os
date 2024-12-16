@@ -12,8 +12,8 @@ rsync -rvK /ctx/system_files/dx/ /
 # Apply IP Forwarding before installing Docker to prevent messing with LXC networking
 sysctl -p
 
-# Generate image-info.json (Not Needed?)
-# /ctx/build_files/shared/image-info.sh
+# Generate image-info.json
+/ctx/build_files/shared/00-image-info.sh
 
 # # COPR Repos
 # /ctx/build_files/dx/01-install-copr-repos-dx.sh
@@ -26,9 +26,6 @@ sysctl -p
 
 # # Fetch Install
 # /ctx/build_files/dx/04-override-install-dx.sh
-
-# Branding Changes
-sed -i '/^PRETTY_NAME/s/Bluefin/Bluefin-dx/' /usr/lib/os-release
 
 # # Systemd and Disable Repos
 # /ctx/build_files/dx/09-cleanup-dx.sh

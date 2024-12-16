@@ -30,7 +30,7 @@ rsync -rvK /ctx/system_files/shared/ /
 rsync -rvK /ctx/system_files/"${BASE_IMAGE_NAME}"/ /
 
 # Generate image-info.json
-/ctx/build_files/base/00-image-info.sh
+/ctx/build_files/shared/00-image-info.sh
 
 # # Build Fix - Fix known skew offenders
 # /ctx/build_files/base/01-build-fix.sh
