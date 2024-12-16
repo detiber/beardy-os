@@ -40,3 +40,21 @@ generate-default-tag tag="latest" ghcr="0":
     fi
 
     echo "${DEFAULT_TAG}"
+
+_disk-use: (_header "Disk Use") && (_footer "Disk Use")
+    just sudoif du -hs /var/tmp /tmp
+    find {{ build-dir }} -type d -exec du -hs {} \; | sort -h
+    podman system df
+    just sudoif podman system df
+
+_header title:
+    @echo ""
+    @echo '============================================'
+    @echo "Start: {{ title }}"
+    @echo '============================================'
+
+_footer title:
+    @echo '============================================'
+    @echo "End: {{ title }}"
+    @echo '============================================'
+    @echo ""

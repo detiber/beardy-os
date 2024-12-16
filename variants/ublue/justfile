@@ -1,0 +1,27 @@
+import '../../just/common.just'
+import '../../just/build.just'
+import '../../just/iso.just'
+
+ublue-build-dir := join(build-dir, 'output', 'variants', 'ublue')
+ublue-cache-dir := join(build-dir, 'cache', 'ublue')
+rechunk-dir := join(ublue-cache-dir, 'rechunk')
+
+# Build Image
+[group('Image')]
+build image="beardy-ublue" tag="latest" base_image="ghcr.io/ublue-os/base-main" args="": && (_build image tag base_image args)
+
+# Rechunk Image
+[group('Utility')]
+rechunk image="beardy-ublue" tag="latest" base_image="ghcr.io/ublue-os/base-main": && (_rechunk image tag base_image rechunk-dir)
+
+# Load OCI into Podman Store
+[group('Utility')]
+load-rechunk image="beardy-ublue" tag="latest": && (_load-rechunk image tag rechunk-dir)
+
+# Secureboot Check
+[group('Utility')]
+secureboot image="beardy-ublue" tag="latest": && (_secureboot image tag)
+
+try: build rechunk load-rechunk secureboot
+
+build-iso source_image_ref="localhost/beardy-ublue:latest" out_dir=ublue-build-dir out_filename="beardy-ublue.iso": && (_build-iso source_image_ref out_dir out_filename)

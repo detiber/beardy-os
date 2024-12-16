@@ -1,5 +1,6 @@
 mod bootc 'variants/bootc/justfile'
 mod bluefin 'variants/bluefin/justfile'
+mod ublue 'variants/ublue/justfile'
 
 import 'just/common.just'
 
