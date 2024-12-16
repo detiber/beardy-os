@@ -1,8 +1,8 @@
 # beardy-os &nbsp; [![bluebuild build badge](https://github.com/detiber/beardy-os/actions/workflows/build.yml/badge.svg)](https://github.com/detiber/beardy-os/actions/workflows/build.yml) [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/beardy-os)](https://artifacthub.io/packages/search?repo=beardy-os)
 
-See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
+## NOTE:
 
-After setup, it is recommended you update this README to describe your custom image.
+This repo is used for building os images layered upon various upstream bootc/ublue-os based images. Use at your own risk, and without any support.
 
 ## Installation
 
