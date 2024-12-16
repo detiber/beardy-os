@@ -110,7 +110,7 @@
             id: build_image
             uses: redhat-actions/buildah-build@v2
             with:
-              context: ${{ contextdir }}
+              context: ${{ matrix.contextdir }}
               containerfiles: |
                 ./${{ matrix.containerfile }}
               # Postfix image name with -custom to make it a little more descriptive
